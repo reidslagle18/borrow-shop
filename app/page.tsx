@@ -36,6 +36,19 @@ function BookingSheet({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+
+  // logged-in shoppers don't retype their info
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("borrow_profile");
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.name) setName(p.name);
+        if (p.phone) setPhone(p.phone);
+        if (p.email) setEmail(p.email);
+      }
+    } catch {}
+  }, []);
   const [waiver, setWaiver] = useState(true);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -283,8 +296,10 @@ export default function Shop() {
   const [fSize, setFSize] = useState("");
   const [fEvent, setFEvent] = useState("");
   const [open, setOpen] = useState<PublicItem | null>(null);
+  const [hasAccount, setHasAccount] = useState(false);
 
   useEffect(() => {
+    setHasAccount(!!localStorage.getItem("borrow_account_token"));
     (async () => {
       try {
         const res = await fetch("/api/collection");
@@ -311,13 +326,30 @@ export default function Shop() {
   return (
     <main>
       {/* Top bar */}
-      <header className="flex items-center justify-end px-5 pt-4">
-        <a
-          href="/portal"
-          className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] text-ink/70 transition-colors hover:border-ink/35"
-        >
-          Consignor login
-        </a>
+      <header className="flex items-center justify-end gap-2 px-5 pt-4">
+        {hasAccount ? (
+          <a
+            href="/account"
+            className="rounded-full bg-ink px-4 py-2 text-[13px] text-cream"
+          >
+            My account
+          </a>
+        ) : (
+          <>
+            <a
+              href="/account"
+              className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] text-ink/70 transition-colors hover:border-ink/35"
+            >
+              Log in
+            </a>
+            <a
+              href="/account?signup=1"
+              className="rounded-full bg-ink px-4 py-2 text-[13px] text-cream"
+            >
+              Sign up
+            </a>
+          </>
+        )}
       </header>
 
       {/* Hero */}
@@ -482,10 +514,10 @@ export default function Shop() {
           Rent the dress · Keep the night
         </p>
         <a
-          href="/portal"
+          href="/account"
           className="mt-4 inline-block rounded-full border border-ink/15 px-4 py-2 text-[13px] text-ink/55"
         >
-          Consignor? Check on your pieces →
+          Your account &amp; consignment closet →
         </a>
       </footer>
 
