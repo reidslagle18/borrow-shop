@@ -1,65 +1,479 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useMemo, useState } from "react";
+import {
+  PublicItem,
+  EVENT_TYPES,
+  SIZES,
+  toISO,
+  addDays,
+  fmtShort,
+  findClash,
+} from "@/lib/types";
+
+const inputCls =
+  "w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-base outline-none focus:border-ink/40";
+const labelCls = "mb-1.5 block text-xs uppercase tracking-[0.18em] text-ink/50";
+
+function money(n: number | string): string {
+  return `$${Number(n)}`;
+}
+
+function tomorrowISO(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return toISO(d);
+}
+
+function BookingSheet({
+  item,
+  onClose,
+}: {
+  item: PublicItem;
+  onClose: () => void;
+}) {
+  const [start, setStart] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [waiver, setWaiver] = useState(true);
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [booked, setBooked] = useState(false);
+  const [error, setError] = useState("");
+
+  const due = start ? addDays(start, 7) : "";
+  const clash = start ? findClash(item.booked, start, due) : null;
+  const total = Number(item.rental_price) + (waiver ? 5 : 0);
+
+  const upcoming = item.booked
+    .filter((b) => b.due_date.slice(0, 10) >= toISO(new Date()))
+    .slice(0, 4);
+
+  async function book() {
+    if (!start || !name.trim() || !phone.trim()) {
+      setError("Your name, number and a pickup date are required.");
+      return;
+    }
+    if (clash) return;
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_id: item.id,
+        start_date: start,
+        due_date: due,
+        name,
+        phone,
+        email,
+        damage_waiver: waiver,
+        notes,
+      }),
+    });
+    if (res.ok) {
+      setBooked(true);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Couldn't book — try again.");
+      setSaving(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/45 sm:items-center sm:p-6"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {booked ? (
+          <div className="px-8 py-16 text-center">
+            <h2 className="font-serif text-4xl italic font-medium">
+              You&apos;re booked.
+            </h2>
+            <p className="mx-auto mt-4 max-w-sm text-[15px] leading-relaxed text-ink/60">
+              The {item.brand} is yours {fmtShort(start)} – {fmtShort(due)}.
+              We&apos;ll text you at {phone} to set up pickup. Total at pickup:{" "}
+              {money(total)}.
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-8 rounded-full bg-ink px-8 py-3.5 text-base text-cream"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-[260px_1fr]">
+            <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:h-full sm:rounded-l-3xl">
+              {item.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.photo_url}
+                  alt={`${item.brand} dress`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center font-serif text-6xl italic text-ink/20">
+                  {item.brand.charAt(0)}
+                </div>
+              )}
+              <button
+                onClick={onClose}
+                className="absolute right-3 top-3 rounded-full bg-cream/90 px-3 py-1 text-xl leading-none text-ink/60 sm:hidden"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 sm:p-7">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="font-serif text-3xl font-semibold leading-tight">
+                    {item.brand}
+                  </h2>
+                  <p className="mt-1 text-sm text-ink/55">
+                    Size {item.size}
+                    {item.color ? ` · ${item.color}` : ""} ·{" "}
+                    {money(item.rental_price)} for the week
+                  </p>
+                  {item.event_types.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {item.event_types.map((ev) => (
+                        <span
+                          key={ev}
+                          className="rounded-full bg-lavender/60 px-2.5 py-0.5 text-[11px]"
+                        >
+                          {ev}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={onClose}
+                  className="hidden rounded-full px-3 py-1 text-2xl leading-none text-ink/40 hover:bg-ink/5 sm:block"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="mt-5 space-y-4">
+                <div>
+                  <label className={labelCls}>Pickup day</label>
+                  <input
+                    type="date"
+                    min={tomorrowISO()}
+                    className={inputCls}
+                    value={start}
+                    onChange={(e) => setStart(e.target.value)}
+                  />
+                  {start && !clash && (
+                    <p className="mt-1.5 text-[13px] text-ink/55">
+                      Yours {fmtShort(start)} – {fmtShort(due)} · back by{" "}
+                      {fmtShort(due)} to skip late fees ($15/day)
+                    </p>
+                  )}
+                  {clash && (
+                    <p className="mt-1.5 rounded-xl bg-blush/30 px-3 py-2 text-[13px]">
+                      She&apos;s spoken for {fmtShort(clash.start_date)} –{" "}
+                      {fmtShort(clash.due_date)} — pick another week.
+                    </p>
+                  )}
+                  {upcoming.length > 0 && !clash && (
+                    <p className="mt-1.5 text-[12px] text-ink/45">
+                      Already taken:{" "}
+                      {upcoming
+                        .map(
+                          (b) =>
+                            `${fmtShort(b.start_date)}–${fmtShort(b.due_date)}`
+                        )
+                        .join(", ")}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2 sm:col-span-1">
+                    <label className={labelCls}>Name *</label>
+                    <input
+                      className={inputCls}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoComplete="name"
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label className={labelCls}>Phone *</label>
+                    <input
+                      type="tel"
+                      className={inputCls}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      autoComplete="tel"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className={labelCls}>Email</label>
+                    <input
+                      type="email"
+                      className={inputCls}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setWaiver(!waiver)}
+                  className={`w-full rounded-xl border px-3.5 py-3 text-left text-[14px] leading-snug ${
+                    waiver
+                      ? "border-sage-deep bg-sage/40"
+                      : "border-ink/15 bg-white text-ink/60"
+                  }`}
+                >
+                  <span className="font-medium">
+                    {waiver ? "✓ " : ""}$5 damage waiver
+                  </span>{" "}
+                  — covers the little stuff (a loose thread, a stuck zipper) so
+                  you don&apos;t stress all night.
+                </button>
+
+                <div>
+                  <label className={labelCls}>Anything we should know?</label>
+                  <input
+                    className={inputCls}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="It's for spring formal on Saturday…"
+                  />
+                </div>
+
+                {error && <p className="text-sm text-blush-deep">{error}</p>}
+
+                <button
+                  onClick={book}
+                  disabled={saving || !!clash}
+                  className="w-full rounded-full bg-ink px-6 py-4 text-base text-cream transition-opacity disabled:opacity-40"
+                >
+                  {saving
+                    ? "Booking…"
+                    : `Book it · ${money(total)} at pickup`}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function Shop() {
+  const [items, setItems] = useState<PublicItem[] | null>(null);
+  const [error, setError] = useState("");
+  const [fSize, setFSize] = useState("");
+  const [fEvent, setFEvent] = useState("");
+  const [open, setOpen] = useState<PublicItem | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/collection");
+        if (!res.ok) throw new Error();
+        setItems(await res.json());
+      } catch {
+        setError("The closet didn't load — refresh to try again.");
+      }
+    })();
+  }, []);
+
+  const sizes = useMemo(() => {
+    const present = new Set((items ?? []).map((i) => i.size));
+    return SIZES.filter((s) => present.has(s));
+  }, [items]);
+
+  const list = useMemo(() => {
+    let l = items ?? [];
+    if (fSize) l = l.filter((i) => i.size === fSize);
+    if (fEvent) l = l.filter((i) => i.event_types?.includes(fEvent));
+    return l;
+  }, [items, fSize, fEvent]);
+
+  return (
+    <main>
+      {/* Hero */}
+      <section className="px-6 pb-10 pt-14 text-center sm:pt-20">
+        <h1 className="font-serif text-6xl italic font-medium tracking-tight sm:text-7xl">
+          BORROW
+        </h1>
+        <p className="mx-auto mt-4 max-w-md text-[17px] leading-relaxed text-ink/65">
+          Rent the dress, keep the night. A curated closet for formals, date
+          parties and game days — yours for the week, $45–$85.
+        </p>
+        <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ink/45">
+          <span>Pick her</span>
+          <span className="text-blush-deep">·</span>
+          <span>Book your week</span>
+          <span className="text-blush-deep">·</span>
+          <span>Return by day 7</span>
+        </div>
+      </section>
+
+      {/* Filters */}
+      <section className="sticky top-0 z-30 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
+          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
+            <button
+              onClick={() => setFEvent("")}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm ${
+                fEvent === "" ? "bg-ink text-cream" : "bg-white text-ink/60"
+              }`}
+            >
+              Everything
+            </button>
+            {EVENT_TYPES.map((ev) => (
+              <button
+                key={ev}
+                onClick={() => setFEvent(fEvent === ev ? "" : ev)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm ${
+                  fEvent === ev ? "bg-ink text-cream" : "bg-white text-ink/60"
+                }`}
+              >
+                {ev}
+              </button>
+            ))}
+          </div>
+          <select
+            value={fSize}
+            onChange={(e) => setFSize(e.target.value)}
+            className="ml-auto rounded-full border border-ink/15 bg-white px-3.5 py-2 text-sm outline-none"
+          >
+            <option value="">All sizes</option>
+            {sizes.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
+
+      {/* Grid */}
+      <section className="mx-auto max-w-5xl px-5 py-8">
+        {error ? (
+          <p className="py-20 text-center text-ink/50">{error}</p>
+        ) : items === null ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[3/4] animate-pulse rounded-2xl bg-ink/5"
+              />
+            ))}
+          </div>
+        ) : list.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="font-serif text-3xl italic text-ink/40">
+              {items.length === 0
+                ? "The closet is being stocked"
+                : "Nothing in that filter — yet"}
+            </p>
+            <p className="mt-2 text-sm text-ink/45">
+              {items.length === 0
+                ? "Check back soon — new pieces drop weekly."
+                : "Try another event or size."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {list.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setOpen(item)}
+                className="group text-left"
+              >
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-white">
+                  {item.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.photo_url}
+                      alt={`${item.brand} dress`}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-lavender/40">
+                      <span className="font-serif text-5xl italic text-ink/25">
+                        {item.brand.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  <span className="absolute bottom-2.5 right-2.5 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
+                    {money(item.rental_price)}
+                  </span>
+                </div>
+                <div className="px-1 pt-2.5">
+                  <p className="truncate font-serif text-lg font-semibold leading-tight">
+                    {item.brand}
+                  </p>
+                  <p className="mt-0.5 text-[13px] text-ink/50">
+                    Size {item.size}
+                    {item.color ? ` · ${item.color}` : ""}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* How it works */}
+      <section className="border-t border-ink/10 bg-white/50 px-6 py-14">
+        <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
+          <div>
+            <p className="font-serif text-3xl italic text-blush-deep">1</p>
+            <h3 className="mt-1 text-xl font-medium">Pick her</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
+              Browse the closet by event or size. Every piece is cleaned and
+              inspected between wears.
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl italic text-blush-deep">2</p>
+            <h3 className="mt-1 text-xl font-medium">Book your week</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
+              Choose your pickup day — the dress is yours for 7 days. Pay at
+              pickup.
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl italic text-blush-deep">3</p>
+            <h3 className="mt-1 text-xl font-medium">Wear &amp; return</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
+              Live your night, bring her back by day 7. Late returns run
+              $15/day — don&apos;t do her like that.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer className="px-6 py-10 text-center">
+        <p className="font-serif text-2xl italic font-medium">BORROW</p>
+        <p className="mt-1 text-[12px] uppercase tracking-[0.25em] text-ink/40">
+          Rent the dress · Keep the night
+        </p>
+      </footer>
+
+      {open && <BookingSheet item={open} onClose={() => setOpen(null)} />}
+    </main>
   );
 }
