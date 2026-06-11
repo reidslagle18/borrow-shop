@@ -310,8 +310,18 @@ export default function Shop() {
 
   return (
     <main>
+      {/* Top bar */}
+      <header className="flex items-center justify-end px-5 pt-4">
+        <a
+          href="/portal"
+          className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] text-ink/70 transition-colors hover:border-ink/35"
+        >
+          Consignor login
+        </a>
+      </header>
+
       {/* Hero */}
-      <section className="px-6 pb-10 pt-14 text-center sm:pt-20">
+      <section className="px-6 pb-10 pt-6 text-center sm:pt-12">
         <h1 className="font-serif text-6xl italic font-medium tracking-tight sm:text-7xl">
           BORROW
         </h1>
