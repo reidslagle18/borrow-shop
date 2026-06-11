@@ -471,6 +471,12 @@ export default function Shop() {
         <p className="mt-1 text-[12px] uppercase tracking-[0.25em] text-ink/40">
           Rent the dress · Keep the night
         </p>
+        <a
+          href="/portal"
+          className="mt-4 inline-block rounded-full border border-ink/15 px-4 py-2 text-[13px] text-ink/55"
+        >
+          Consignor? Check on your pieces →
+        </a>
       </footer>
 
       {open && <BookingSheet item={open} onClose={() => setOpen(null)} />}
