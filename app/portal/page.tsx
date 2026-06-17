@@ -65,10 +65,17 @@ export default function PortalPage() {
   }
 
   useEffect(() => {
+    // A code in the URL (?code=ABC123, e.g. from the "your piece rented" email)
+    // logs the consignor straight in; otherwise fall back to a saved code.
+    const fromUrl = new URLSearchParams(window.location.search)
+      .get("code")
+      ?.trim()
+      .toUpperCase();
     const saved = localStorage.getItem("borrow_portal_code");
-    if (saved) {
-      setCode(saved);
-      login(saved);
+    const initial = fromUrl || saved;
+    if (initial) {
+      setCode(initial);
+      login(initial);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
