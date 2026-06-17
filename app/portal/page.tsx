@@ -40,50 +40,68 @@ function money(n: number | string): string {
 }
 
 export default function PortalPage() {
-  const [code, setCode] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [portal, setPortal] = useState<Portal | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function login(c: string) {
+  async function login(creds: { email?: string; phone?: string; code?: string }) {
     setBusy(true);
     setError("");
     const res = await fetch("/api/portal", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: c }),
+      body: JSON.stringify(creds),
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
       setPortal(data);
-      localStorage.setItem("borrow_portal_code", c.trim().toUpperCase());
+      // Remember email + phone so they stay logged in (no code needed).
+      if (creds.email && creds.phone) {
+        localStorage.setItem(
+          "borrow_portal_login",
+          JSON.stringify({ email: creds.email, phone: creds.phone })
+        );
+      }
     } else {
       setError(data.error || "That didn't work — try again.");
-      localStorage.removeItem("borrow_portal_code");
     }
     setBusy(false);
   }
 
   useEffect(() => {
-    // A code in the URL (?code=ABC123, e.g. from the "your piece rented" email)
-    // logs the consignor straight in; otherwise fall back to a saved code.
+    // A code in the URL (?code=ABC123, from the "your piece rented" email) logs
+    // the consignor straight in; otherwise resume a saved email + phone login.
     const fromUrl = new URLSearchParams(window.location.search)
       .get("code")
       ?.trim()
       .toUpperCase();
-    const saved = localStorage.getItem("borrow_portal_code");
-    const initial = fromUrl || saved;
-    if (initial) {
-      setCode(initial);
-      login(initial);
+    if (fromUrl) {
+      login({ code: fromUrl });
+      return;
+    }
+    const saved = localStorage.getItem("borrow_portal_login");
+    if (saved) {
+      try {
+        const { email: e, phone: p } = JSON.parse(saved);
+        if (e && p) {
+          setEmail(e);
+          setPhone(p);
+          login({ email: e, phone: p });
+        }
+      } catch {
+        localStorage.removeItem("borrow_portal_login");
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function logout() {
-    localStorage.removeItem("borrow_portal_code");
+    localStorage.removeItem("borrow_portal_login");
     setPortal(null);
-    setCode("");
+    setEmail("");
+    setPhone("");
   }
 
   return (
@@ -103,28 +121,37 @@ export default function PortalPage() {
             Check on your pieces
           </h1>
           <p className="mt-2 text-[15px] leading-relaxed text-ink/55">
-            Enter the access code BORROW gave you to see your closet, what
-            it&apos;s earned, and what&apos;s headed your way.
+            Sign in with the email and phone number BORROW has on file to see
+            your closet, what it&apos;s earned, and what&apos;s headed your way.
           </p>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (code.trim()) login(code);
+              if (email.trim() && phone.trim())
+                login({ email: email.trim(), phone: phone.trim() });
             }}
             className="mt-6 space-y-3"
           >
             <input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="ACCESS CODE"
-              autoCapitalize="characters"
-              autoComplete="off"
-              className="w-full rounded-full border border-ink/15 bg-white px-5 py-3.5 text-center text-base tracking-[0.25em] outline-none focus:border-ink/40"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              autoComplete="email"
+              className="w-full rounded-full border border-ink/15 bg-white px-5 py-3.5 text-center text-base outline-none focus:border-ink/40"
+            />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone"
+              autoComplete="tel"
+              className="w-full rounded-full border border-ink/15 bg-white px-5 py-3.5 text-center text-base outline-none focus:border-ink/40"
             />
             {error && <p className="text-sm text-blush-deep">{error}</p>}
             <button
               type="submit"
-              disabled={busy || !code.trim()}
+              disabled={busy || !email.trim() || !phone.trim()}
               className="w-full rounded-full bg-ink px-5 py-3.5 text-base text-cream disabled:opacity-40"
             >
               {busy ? "One sec…" : "See my closet"}

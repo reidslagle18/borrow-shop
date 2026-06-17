@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const res = await fetch(`${base}/api/public/consignor-portal`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": key },
-      body: JSON.stringify({ code: b.code }),
+      body: JSON.stringify({ email: b.email, phone: b.phone, code: b.code }),
     });
     const data = await res.json().catch(() => ({}));
     return NextResponse.json(data, { status: res.status });
