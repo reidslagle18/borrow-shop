@@ -41,6 +41,7 @@ type Account = {
   name: string;
   email: string | null;
   phone: string | null;
+  store_credit?: number;
   rentals: AccountRental[];
   consignment: {
     items: ConsignItem[];
@@ -265,6 +266,20 @@ export default function AccountPage() {
               Log out
             </button>
           </div>
+
+          {account.store_credit != null && account.store_credit > 0 && (
+            <div className="mt-5 rounded-2xl bg-sage/30 p-4 text-center">
+              <p className="text-[11px] uppercase tracking-[0.15em] text-ink/45">
+                Store credit
+              </p>
+              <p className="mt-1 font-serif text-2xl font-semibold">
+                {money(account.store_credit)}
+              </p>
+              <p className="mt-1 text-[13px] text-ink/55">
+                Applied automatically at your next checkout.
+              </p>
+            </div>
+          )}
 
           {/* Her rentals */}
           <h2 className="mt-7 font-serif text-2xl font-medium">Your rentals</h2>
