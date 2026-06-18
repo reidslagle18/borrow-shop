@@ -111,8 +111,10 @@ function BookingSheet({
             </h2>
             <p className="mx-auto mt-4 max-w-sm text-[15px] leading-relaxed text-ink/60">
               The {item.brand} is yours {fmtShort(start)} – {fmtShort(due)}.
-              We&apos;ll text you at {phone} to set up pickup. Total at pickup:{" "}
-              {money(total)}.
+              {email
+                ? ` We've emailed your confirmation to ${email} and we'll send a pickup reminder.`
+                : " We'll be in touch to set up pickup."}{" "}
+              Total at pickup: {money(total)}.
             </p>
             <button
               onClick={onClose}
