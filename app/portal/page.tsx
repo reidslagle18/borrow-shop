@@ -31,6 +31,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   reserved: { label: "Reserved", cls: "bg-lavender" },
   rented: { label: "Rented out", cls: "bg-blush" },
   cleaning: { label: "Being cleaned", cls: "bg-butter" },
+  with_consignor: { label: "With you", cls: "bg-lavender" },
   retired: { label: "Returned to you", cls: "bg-ink/10 text-ink/60" },
 };
 
