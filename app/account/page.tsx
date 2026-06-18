@@ -16,6 +16,7 @@ type AccountRental = {
   status: string;
   rental_price: string | number;
   damage_waiver: boolean;
+  cleaning_fee: string | number | null;
   late_fee: string | number;
   brand: string;
   size: string;
@@ -298,7 +299,8 @@ export default function AccountPage() {
                       <p className="truncate text-[13px] text-ink/55">
                         {fmtShort(r.start_date)} – {fmtShort(r.due_date)} ·{" "}
                         {money(
-                          Number(r.rental_price) + (r.damage_waiver ? 5 : 0)
+                          Number(r.rental_price) +
+                            (Number(r.cleaning_fee) || (r.damage_waiver ? 5 : 0))
                         )}
                         {Number(r.late_fee) > 0 &&
                           ` · ${money(r.late_fee)} late fee`}

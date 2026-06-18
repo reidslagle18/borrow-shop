@@ -49,7 +49,6 @@ function BookingSheet({
       }
     } catch {}
   }, []);
-  const [waiver, setWaiver] = useState(true);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [booked, setBooked] = useState(false);
@@ -57,7 +56,9 @@ function BookingSheet({
 
   const due = start ? addDays(start, 7) : "";
   const clash = start ? findClash(item.booked, start, due) : null;
-  const total = Number(item.rental_price) + (waiver ? 5 : 0);
+  // Mandatory Cleaning & Care Fee on every rental.
+  const CLEANING_FEE = 6;
+  const total = Number(item.rental_price) + CLEANING_FEE;
 
   const upcoming = item.booked
     .filter((b) => b.due_date.slice(0, 10) >= toISO(new Date()))
@@ -81,7 +82,7 @@ function BookingSheet({
         name,
         phone,
         email,
-        damage_waiver: waiver,
+        damage_waiver: true,
         notes,
       }),
     });
@@ -244,21 +245,15 @@ function BookingSheet({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setWaiver(!waiver)}
-                  className={`w-full rounded-xl border px-3.5 py-3 text-left text-[14px] leading-snug ${
-                    waiver
-                      ? "border-sage-deep bg-sage/40"
-                      : "border-ink/15 bg-white text-ink/60"
-                  }`}
-                >
+                <div className="w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-left text-[14px] leading-snug">
                   <span className="font-medium">
-                    {waiver ? "✓ " : ""}$5 damage waiver
+                    ${CLEANING_FEE} Cleaning &amp; Care Fee
                   </span>{" "}
-                  — covers the little stuff (a loose thread, a stuck zipper) so
-                  you don&apos;t stress all night.
-                </button>
+                  — added to every rental for professional cleaning and standard
+                  handling. This is not damage insurance; you&apos;re responsible
+                  for repair or replacement of items damaged beyond normal wear,
+                  stained beyond cleaning, lost, or not returned.
+                </div>
 
                 <div>
                   <label className={labelCls}>Anything we should know?</label>
@@ -483,7 +478,7 @@ export default function Shop() {
         <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
           <div>
             <p className="font-serif text-3xl italic text-blush-deep">1</p>
-            <h3 className="mt-1 text-xl font-medium">Pick her</h3>
+            <h3 className="mt-1 text-xl font-medium">Pick your favorite</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
               Browse the closet by event or size. Every piece is cleaned and
               inspected between wears.
