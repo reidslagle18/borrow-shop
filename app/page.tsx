@@ -152,7 +152,7 @@ function BookingSheet({
                 <img
                   src={item.photo_url}
                   alt={`${item.brand} dress`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center font-serif text-6xl italic text-ink/20">
