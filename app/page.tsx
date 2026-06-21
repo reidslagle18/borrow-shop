@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import MultiSelect from "@/components/MultiSelect";
 import {
   PublicItem,
   EVENT_TYPES,
@@ -10,6 +11,26 @@ import {
   fmtShort,
   findClash,
 } from "@/lib/types";
+
+/** Split a piece's comma-joined color string into individual colors. */
+function itemColors(i: PublicItem): string[] {
+  return (i.color || "").split(",").map((c) => c.trim()).filter(Boolean);
+}
+
+const SILHOUETTE_ORDER = [
+  "Mini Dress",
+  "Midi Dress",
+  "Maxi Dress",
+  "Gown",
+  "Two-Piece",
+  "Top",
+  "Skirt",
+  "Pants",
+  "Jumpsuit",
+  "Co-ord",
+  "Outerwear",
+  "Accessory",
+];
 
 const inputCls =
   "w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-base outline-none focus:border-ink/40";
@@ -290,8 +311,11 @@ function BookingSheet({
 export default function Shop() {
   const [items, setItems] = useState<PublicItem[] | null>(null);
   const [error, setError] = useState("");
-  const [fSize, setFSize] = useState("");
-  const [fEvent, setFEvent] = useState("");
+  const [fSizes, setFSizes] = useState<string[]>([]);
+  const [fColors, setFColors] = useState<string[]>([]);
+  const [fSilhouettes, setFSilhouettes] = useState<string[]>([]);
+  const [fEvents, setFEvents] = useState<string[]>([]);
+  const [sort, setSort] = useState("featured");
   const [open, setOpen] = useState<PublicItem | null>(null);
   const [hasAccount, setHasAccount] = useState(false);
 
@@ -308,17 +332,54 @@ export default function Shop() {
     })();
   }, []);
 
-  const sizes = useMemo(() => {
+  const sizeOptions = useMemo(() => {
     const present = new Set((items ?? []).map((i) => i.size));
     return SIZES.filter((s) => present.has(s));
   }, [items]);
 
+  const colorOptions = useMemo(() => {
+    const set = new Set<string>();
+    (items ?? []).forEach((i) => itemColors(i).forEach((c) => set.add(c)));
+    return Array.from(set).sort();
+  }, [items]);
+
+  const silhouetteOptions = useMemo(() => {
+    const present = new Set(
+      (items ?? []).map((i) => i.silhouette).filter(Boolean) as string[]
+    );
+    const ordered = SILHOUETTE_ORDER.filter((s) => present.has(s));
+    const extras = Array.from(present)
+      .filter((s) => !SILHOUETTE_ORDER.includes(s))
+      .sort();
+    return [...ordered, ...extras];
+  }, [items]);
+
+  const eventOptions = useMemo(() => {
+    const present = new Set<string>();
+    (items ?? []).forEach((i) => (i.event_types || []).forEach((e) => present.add(e)));
+    const ordered = EVENT_TYPES.filter((e) => present.has(e));
+    const extras = Array.from(present).filter((e) => !EVENT_TYPES.includes(e)).sort();
+    return [...ordered, ...extras];
+  }, [items]);
+
   const list = useMemo(() => {
     let l = items ?? [];
-    if (fSize) l = l.filter((i) => i.size === fSize);
-    if (fEvent) l = l.filter((i) => i.event_types?.includes(fEvent));
+    if (fSizes.length) l = l.filter((i) => fSizes.includes(i.size));
+    if (fColors.length)
+      l = l.filter((i) => itemColors(i).some((c) => fColors.includes(c)));
+    if (fSilhouettes.length)
+      l = l.filter((i) => !!i.silhouette && fSilhouettes.includes(i.silhouette));
+    if (fEvents.length)
+      l = l.filter((i) => (i.event_types || []).some((e) => fEvents.includes(e)));
+    if (sort === "price-asc")
+      l = [...l].sort((a, b) => Number(a.rental_price) - Number(b.rental_price));
+    else if (sort === "price-desc")
+      l = [...l].sort((a, b) => Number(b.rental_price) - Number(a.rental_price));
     return l;
-  }, [items, fSize, fEvent]);
+  }, [items, fSizes, fColors, fSilhouettes, fEvents, sort]);
+
+  const anyFilter =
+    fSizes.length || fColors.length || fSilhouettes.length || fEvents.length;
 
   return (
     <main>
@@ -367,41 +428,34 @@ export default function Shop() {
         </div>
       </section>
 
-      {/* Filters */}
+      {/* Filters + sort */}
       <section className="sticky top-0 z-30 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
-          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
+          <MultiSelect label="Event" options={eventOptions} selected={fEvents} onChange={setFEvents} />
+          <MultiSelect label="Size" options={sizeOptions} selected={fSizes} onChange={setFSizes} />
+          <MultiSelect label="Color" options={colorOptions} selected={fColors} onChange={setFColors} />
+          <MultiSelect label="Silhouette" options={silhouetteOptions} selected={fSilhouettes} onChange={setFSilhouettes} />
+          {anyFilter ? (
             <button
-              onClick={() => setFEvent("")}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm ${
-                fEvent === "" ? "bg-ink text-cream" : "bg-white text-ink/60"
-              }`}
+              onClick={() => {
+                setFEvents([]);
+                setFSizes([]);
+                setFColors([]);
+                setFSilhouettes([]);
+              }}
+              className="text-sm text-ink/45 underline underline-offset-2"
             >
-              Everything
+              Clear
             </button>
-            {EVENT_TYPES.map((ev) => (
-              <button
-                key={ev}
-                onClick={() => setFEvent(fEvent === ev ? "" : ev)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm ${
-                  fEvent === ev ? "bg-ink text-cream" : "bg-white text-ink/60"
-                }`}
-              >
-                {ev}
-              </button>
-            ))}
-          </div>
+          ) : null}
           <select
-            value={fSize}
-            onChange={(e) => setFSize(e.target.value)}
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
             className="ml-auto rounded-full border border-ink/15 bg-white px-3.5 py-2 text-sm outline-none"
           >
-            <option value="">All sizes</option>
-            {sizes.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
           </select>
         </div>
       </section>
@@ -429,7 +483,7 @@ export default function Shop() {
             <p className="mt-2 text-sm text-ink/45">
               {items.length === 0
                 ? "Check back soon — new pieces drop weekly."
-                : "Try another event or size."}
+                : "Try clearing a filter or two."}
             </p>
           </div>
         ) : (

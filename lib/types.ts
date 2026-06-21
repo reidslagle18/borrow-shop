@@ -8,6 +8,7 @@ export interface PublicItem {
   brand: string;
   size: string;
   color: string | null;
+  silhouette: string | null;
   tier: "standard" | "mid" | "premium";
   rental_price: string | number;
   event_types: string[];
