@@ -122,7 +122,7 @@ function BookingSheet({
       onClick={onClose}
     >
       <div
-        className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl"
+        className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {booked ? (
@@ -145,14 +145,14 @@ function BookingSheet({
             </button>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-[260px_1fr]">
+          <div className="grid sm:grid-cols-[360px_1fr]">
             <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:h-full sm:rounded-l-3xl">
               {item.photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={item.photo_url}
                   alt={`${item.brand} dress`}
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center font-serif text-6xl italic text-ink/20">
