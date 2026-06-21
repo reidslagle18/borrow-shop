@@ -456,6 +456,15 @@ export default function Shop() {
                       </span>
                     </div>
                   )}
+                  {item.photos?.[1] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.photos[1]}
+                      alt={`${item.brand} dress, alternate view`}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    />
+                  )}
                   <span className="absolute bottom-2.5 right-2.5 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
                     {money(item.rental_price)}
                   </span>

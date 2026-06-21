@@ -12,6 +12,7 @@ export interface PublicItem {
   rental_price: string | number;
   event_types: string[];
   photo_url: string | null;
+  photos: string[];
   status: string;
   booked: BookedRange[];
 }
