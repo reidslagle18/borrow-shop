@@ -356,7 +356,7 @@ export default function Shop() {
         </h1>
         <p className="mx-auto mt-4 max-w-md text-[17px] leading-relaxed text-ink/65">
           Rent the dress, keep the night. A curated closet for formals, date
-          parties and game days — yours for the week, $45–$85.
+          parties and game days — yours for the week.
         </p>
         <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ink/45">
           <span>Pick her</span>
