@@ -179,6 +179,11 @@ function BookingSheet({
                     {item.color ? ` · ${item.color}` : ""} ·{" "}
                     {money(item.rental_price)} for the week
                   </p>
+                  {item.retail_value != null && Number(item.retail_value) > 0 && (
+                    <p className="mt-0.5 text-[13px] text-ink/45">
+                      Retails for {money(item.retail_value)}
+                    </p>
+                  )}
                   {item.event_types.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1">
                       {item.event_types.map((ev) => (

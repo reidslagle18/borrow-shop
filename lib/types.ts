@@ -11,6 +11,7 @@ export interface PublicItem {
   silhouette: string | null;
   tier: "standard" | "mid" | "premium";
   rental_price: string | number;
+  retail_value: string | number | null;
   event_types: string[];
   photo_url: string | null;
   photos: string[];
