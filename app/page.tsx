@@ -536,6 +536,11 @@ export default function Shop() {
                     Size {item.size}
                     {item.color ? ` · ${item.color}` : ""}
                   </p>
+                  {item.retail_value != null && Number(item.retail_value) > 0 && (
+                    <p className="mt-0.5 text-[12px] text-ink/40">
+                      Retails {money(item.retail_value)}
+                    </p>
+                  )}
                 </div>
               </button>
             ))}
