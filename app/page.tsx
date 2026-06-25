@@ -72,7 +72,6 @@ function BookingSheet({
   }, []);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [booked, setBooked] = useState(false);
   const [error, setError] = useState("");
 
   const due = start ? addDays(start, 7) : "";
@@ -93,7 +92,8 @@ function BookingSheet({
     if (clash) return;
     setSaving(true);
     setError("");
-    const res = await fetch("/api/book", {
+    // Pay online to reserve — get a Stripe Checkout URL and send them there.
+    const res = await fetch("/api/pay", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -103,17 +103,15 @@ function BookingSheet({
         name,
         phone,
         email,
-        damage_waiver: true,
-        notes,
       }),
     });
-    if (res.ok) {
-      setBooked(true);
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error || "Couldn't book — try again.");
-      setSaving(false);
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.url) {
+      window.location.href = data.url; // off to Stripe Checkout
+      return;
     }
+    setError(data.error || "Couldn't start checkout — try again.");
+    setSaving(false);
   }
 
   return (
@@ -125,26 +123,7 @@ function BookingSheet({
         className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {booked ? (
-          <div className="px-8 py-16 text-center">
-            <h2 className="font-serif text-4xl italic font-medium">
-              You&apos;re booked.
-            </h2>
-            <p className="mx-auto mt-4 max-w-sm text-[15px] leading-relaxed text-ink/60">
-              The {item.brand} is yours {fmtShort(start)} – {fmtShort(due)}.
-              {email
-                ? ` We've emailed your confirmation to ${email} and we'll send a pickup reminder.`
-                : " We'll be in touch to set up pickup."}{" "}
-              Total at pickup: {money(total)}.
-            </p>
-            <button
-              onClick={onClose}
-              className="mt-8 rounded-full bg-ink px-8 py-3.5 text-base text-cream"
-            >
-              Done
-            </button>
-          </div>
-        ) : (
+        {(
           <div className="grid sm:grid-cols-[360px_1fr]">
             <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:h-full sm:rounded-l-3xl">
               {item.photo_url ? (
@@ -301,8 +280,8 @@ function BookingSheet({
                   className="w-full rounded-full bg-ink px-6 py-4 text-base text-cream transition-opacity disabled:opacity-40"
                 >
                   {saving
-                    ? "Booking…"
-                    : `Book it · ${money(total)} at pickup`}
+                    ? "Taking you to checkout…"
+                    : `Pay & reserve · ${money(total)}`}
                 </button>
               </div>
             </div>
@@ -323,6 +302,7 @@ export default function Shop() {
   const [sort, setSort] = useState("featured");
   const [open, setOpen] = useState<PublicItem | null>(null);
   const [hasAccount, setHasAccount] = useState(false);
+  const [reserved, setReserved] = useState<"confirming" | "done" | "error" | null>(null);
 
   useEffect(() => {
     setHasAccount(!!localStorage.getItem("borrow_account_token"));
@@ -334,6 +314,26 @@ export default function Shop() {
       } catch {
         setError("The closet didn't load — refresh to try again.");
       }
+    })();
+  }, []);
+
+  // Returning from Stripe Checkout (?reserved=<session_id>) — confirm the reservation.
+  useEffect(() => {
+    const sessionId = new URLSearchParams(window.location.search).get("reserved");
+    if (!sessionId) return;
+    setReserved("confirming");
+    (async () => {
+      try {
+        const res = await fetch("/api/fulfill", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
+        setReserved(res.ok ? "done" : "error");
+      } catch {
+        setReserved("error");
+      }
+      window.history.replaceState({}, "", "/");
     })();
   }, []);
 
@@ -388,6 +388,50 @@ export default function Shop() {
 
   return (
     <main>
+      {reserved && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/45 p-6"
+          onClick={() => reserved !== "confirming" && setReserved(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-cream p-8 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {reserved === "confirming" ? (
+              <p className="text-[15px] text-ink/60">Confirming your reservation…</p>
+            ) : reserved === "done" ? (
+              <>
+                <h2 className="font-serif text-4xl italic font-medium">You&apos;re reserved.</h2>
+                <p className="mx-auto mt-4 max-w-xs text-[15px] leading-relaxed text-ink/60">
+                  Payment received and your piece is held. We&apos;ll email your
+                  confirmation and a pickup reminder — all you have to do is pick it up.
+                </p>
+                <button
+                  onClick={() => setReserved(null)}
+                  className="mt-7 rounded-full bg-ink px-8 py-3.5 text-base text-cream"
+                >
+                  Done
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className="font-serif text-3xl italic font-medium">Hmm — one sec.</h2>
+                <p className="mx-auto mt-3 max-w-xs text-[15px] leading-relaxed text-ink/60">
+                  Your payment may have gone through but we couldn&apos;t confirm the
+                  reservation here. Please text BORROW and we&apos;ll sort it right away.
+                </p>
+                <button
+                  onClick={() => setReserved(null)}
+                  className="mt-6 rounded-full border border-ink/15 px-6 py-3 text-[15px] text-ink/60"
+                >
+                  Close
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Top bar */}
       <header className="flex items-center justify-end gap-2 px-5 pt-4">
         {hasAccount ? (
