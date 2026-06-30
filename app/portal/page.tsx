@@ -24,6 +24,7 @@ type Portal = {
   earned: number;
   paid: number;
   owed: number;
+  direct_deposit?: { active: boolean; started: boolean };
 };
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -46,6 +47,28 @@ export default function PortalPage() {
   const [portal, setPortal] = useState<Portal | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [creds, setCreds] = useState<{ email?: string; phone?: string; code?: string } | null>(null);
+  const [depositBusy, setDepositBusy] = useState(false);
+  const [depositMsg, setDepositMsg] = useState("");
+  const [justReturned, setJustReturned] = useState(false);
+
+  async function setupDeposit() {
+    if (!creds) return;
+    setDepositBusy(true);
+    setDepositMsg("");
+    const res = await fetch("/api/connect-onboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(creds),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.url) {
+      window.location.href = data.url; // off to Stripe's secure onboarding
+    } else {
+      setDepositMsg(data.error || "Couldn't start setup — try again.");
+      setDepositBusy(false);
+    }
+  }
 
   async function login(creds: { email?: string; phone?: string; code?: string }) {
     setBusy(true);
@@ -58,6 +81,7 @@ export default function PortalPage() {
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
       setPortal(data);
+      setCreds(creds);
       // Remember email + phone so they stay logged in (no code needed).
       if (creds.email && creds.phone) {
         localStorage.setItem(
@@ -74,10 +98,9 @@ export default function PortalPage() {
   useEffect(() => {
     // A code in the URL (?code=ABC123, from the "your piece rented" email) logs
     // the consignor straight in; otherwise resume a saved email + phone login.
-    const fromUrl = new URLSearchParams(window.location.search)
-      .get("code")
-      ?.trim()
-      .toUpperCase();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("deposit") === "done") setJustReturned(true);
+    const fromUrl = params.get("code")?.trim().toUpperCase();
     if (fromUrl) {
       login({ code: fromUrl });
       return;
@@ -210,6 +233,53 @@ export default function PortalPage() {
             You earn 60% of every completed rental. Payouts come straight from
             BORROW.
           </p>
+
+          {/* Direct deposit */}
+          <div className="mt-5 rounded-2xl bg-white p-5">
+            {portal.direct_deposit?.active ? (
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sage text-[13px]">
+                  ✓
+                </span>
+                <div>
+                  <p className="font-medium">Direct deposit is on</p>
+                  <p className="mt-0.5 text-[13px] text-ink/55">
+                    Your 60% is sent straight to your bank automatically every
+                    time one of your pieces is returned.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="font-medium">
+                  {justReturned
+                    ? "Almost there — we're verifying your details"
+                    : "Get paid automatically"}
+                </p>
+                <p className="mt-0.5 text-[13px] text-ink/55">
+                  {justReturned
+                    ? "Direct deposit switches on as soon as your bank and ID are verified (usually quick). You can close this page."
+                    : "Set up direct deposit once and your 60% lands in your bank automatically after each rental — no waiting on a check or Venmo."}
+                </p>
+                {!justReturned && (
+                  <button
+                    onClick={setupDeposit}
+                    disabled={depositBusy || !creds}
+                    className="mt-3 rounded-full bg-ink px-5 py-2.5 text-[15px] text-cream disabled:opacity-40"
+                  >
+                    {depositBusy
+                      ? "One sec…"
+                      : portal.direct_deposit?.started
+                        ? "Finish setting up direct deposit"
+                        : "Set up direct deposit"}
+                  </button>
+                )}
+                {depositMsg && (
+                  <p className="mt-2 text-[13px] text-blush-deep">{depositMsg}</p>
+                )}
+              </>
+            )}
+          </div>
 
           {/* Pieces */}
           <h2 className="mt-8 font-serif text-2xl font-medium">
