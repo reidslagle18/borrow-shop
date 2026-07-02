@@ -121,16 +121,16 @@ function BookingSheet({
       onClick={onClose}
     >
       <div
-        className="max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-t-3xl bg-cream sm:h-[86vh] sm:max-h-[86vh] sm:overflow-hidden sm:rounded-3xl"
+        className="max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl lg:h-[86vh] lg:max-h-[86vh] lg:overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {(
-          <div className="grid sm:h-full sm:grid-cols-2">
-            {/* Big image on the left (Free People style): a 3:4 portrait frame
-                on mobile, and on desktop it fills the modal's full height while
-                the details scroll beside it — so proportions stay correct and
-                the frame is identical from piece to piece. */}
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:aspect-auto sm:h-full sm:rounded-l-3xl">
+          <div className="grid lg:h-full lg:grid-cols-2">
+            {/* Phones + iPad-portrait: a clean 3:4 image stacked above the form
+                (whole sheet scrolls). Desktop / landscape: the image fills the
+                modal's full height while the details scroll beside it. Same
+                frame proportions everywhere — never stretched. */}
+            <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 lg:aspect-auto lg:h-full lg:rounded-l-3xl">
               <PhotoCarousel
                 photos={
                   item.photos?.length
@@ -143,14 +143,14 @@ function BookingSheet({
               />
               <button
                 onClick={onClose}
-                className="absolute right-3 top-3 z-10 rounded-full bg-cream/90 px-3 py-1 text-xl leading-none text-ink/60 sm:hidden"
+                className="absolute right-3 top-3 z-10 rounded-full bg-cream/90 px-3 py-1 text-xl leading-none text-ink/60 lg:hidden"
                 aria-label="Close"
               >
                 ×
               </button>
             </div>
 
-            <div className="p-6 sm:h-full sm:overflow-y-auto sm:p-7">
+            <div className="p-6 lg:h-full lg:overflow-y-auto lg:p-7">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="font-serif text-3xl font-semibold leading-tight">
@@ -181,7 +181,7 @@ function BookingSheet({
                 </div>
                 <button
                   onClick={onClose}
-                  className="hidden rounded-full px-3 py-1 text-2xl leading-none text-ink/40 hover:bg-ink/5 sm:block"
+                  className="hidden rounded-full px-3 py-1 text-2xl leading-none text-ink/40 hover:bg-ink/5 lg:block"
                   aria-label="Close"
                 >
                   ×
@@ -517,7 +517,7 @@ export default function Shop() {
         {error ? (
           <p className="py-20 text-center text-ink/50">{error}</p>
         ) : items === null ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -539,7 +539,7 @@ export default function Shop() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {list.map((item) => {
               const cardPhotos = item.photos?.length
                 ? item.photos

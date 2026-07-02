@@ -37,7 +37,7 @@ export default function MultiSelect({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute z-50 mt-1.5 max-h-72 w-52 overflow-y-auto rounded-2xl border border-ink/10 bg-white p-1.5 shadow-lg">
+          <div className="absolute z-50 mt-1.5 max-h-72 w-52 max-w-[calc(100vw-2.5rem)] overflow-y-auto rounded-2xl border border-ink/10 bg-white p-1.5 shadow-lg">
             {selected.length > 0 && (
               <button
                 onClick={() => onChange([])}
