@@ -126,7 +126,10 @@ function BookingSheet({
       >
         {(
           <div className="grid sm:grid-cols-[360px_1fr]">
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:h-full sm:rounded-l-3xl">
+            {/* Fixed 3:4 portrait frame on every breakpoint (self-start keeps
+                the grid from stretching it), so proportions stay correct and
+                consistent from piece to piece. */}
+            <div className="relative aspect-[3/4] w-full self-start overflow-hidden bg-lavender/40 sm:rounded-l-3xl">
               <PhotoCarousel
                 photos={
                   item.photos?.length
@@ -536,57 +539,49 @@ export default function Shop() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {list.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setOpen(item)}
-                className="group text-left"
-              >
-                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-white">
-                  {item.photo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.photo_url}
+            {list.map((item) => {
+              const cardPhotos = item.photos?.length
+                ? item.photos
+                : item.photo_url
+                  ? [item.photo_url]
+                  : [];
+              return (
+                <div key={item.id} className="group text-left">
+                  {/* Fixed 3:4 frame — stays put as photos change; swipe/arrows
+                      browse, a plain tap opens the item. */}
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
+                    <PhotoCarousel
+                      photos={cardPhotos}
                       alt={`${item.brand} dress`}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      onTap={() => setOpen(item)}
+                      arrowsOnHover
+                      overlay={
+                        <span className="pointer-events-none absolute bottom-2.5 right-2.5 z-10 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
+                          {money(item.rental_price)}
+                        </span>
+                      }
                     />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-lavender/40">
-                      <span className="font-serif text-5xl italic text-ink/25">
-                        {item.brand.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  {item.photos?.[1] && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.photos[1]}
-                      alt={`${item.brand} dress, alternate view`}
-                      loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                    />
-                  )}
-                  <span className="absolute bottom-2.5 right-2.5 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
-                    {money(item.rental_price)}
-                  </span>
-                </div>
-                <div className="px-1 pt-2.5">
-                  <p className="truncate font-serif text-lg font-semibold leading-tight">
-                    {item.brand}
-                  </p>
-                  <p className="mt-0.5 text-[13px] text-ink/50">
-                    Size {item.size}
-                    {item.color ? ` · ${item.color}` : ""}
-                  </p>
-                  {item.retail_value != null && Number(item.retail_value) > 0 && (
-                    <p className="mt-0.5 text-[12px] text-ink/40">
-                      Retails {money(item.retail_value)}
+                  </div>
+                  <button
+                    onClick={() => setOpen(item)}
+                    className="block w-full px-1 pt-2.5 text-left"
+                  >
+                    <p className="truncate font-serif text-lg font-semibold leading-tight">
+                      {item.brand}
                     </p>
-                  )}
+                    <p className="mt-0.5 text-[13px] text-ink/50">
+                      Size {item.size}
+                      {item.color ? ` · ${item.color}` : ""}
+                    </p>
+                    {item.retail_value != null && Number(item.retail_value) > 0 && (
+                      <p className="mt-0.5 text-[12px] text-ink/40">
+                        Retails {money(item.retail_value)}
+                      </p>
+                    )}
+                  </button>
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
