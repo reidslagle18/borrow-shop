@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import MultiSelect from "@/components/MultiSelect";
+import PhotoCarousel from "@/components/PhotoCarousel";
 import {
   PublicItem,
   EVENT_TYPES,
@@ -126,21 +127,19 @@ function BookingSheet({
         {(
           <div className="grid sm:grid-cols-[360px_1fr]">
             <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:h-full sm:rounded-l-3xl">
-              {item.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.photo_url}
-                  alt={`${item.brand} dress`}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center font-serif text-6xl italic text-ink/20">
-                  {item.brand.charAt(0)}
-                </div>
-              )}
+              <PhotoCarousel
+                photos={
+                  item.photos?.length
+                    ? item.photos
+                    : item.photo_url
+                      ? [item.photo_url]
+                      : []
+                }
+                alt={`${item.brand} dress`}
+              />
               <button
                 onClick={onClose}
-                className="absolute right-3 top-3 rounded-full bg-cream/90 px-3 py-1 text-xl leading-none text-ink/60 sm:hidden"
+                className="absolute right-3 top-3 z-10 rounded-full bg-cream/90 px-3 py-1 text-xl leading-none text-ink/60 sm:hidden"
                 aria-label="Close"
               >
                 ×
