@@ -27,6 +27,7 @@ export const EVENT_TYPES = [
   "Rush",
   "Graduation",
   "Wedding Guest",
+  "Bridal",
   "Night Out",
 ];
 
