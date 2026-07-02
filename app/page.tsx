@@ -159,10 +159,12 @@ function BookingSheet({
                   <p className="mt-1 text-sm text-ink/55">
                     Size {item.size}
                     {item.color ? ` · ${item.color}` : ""} ·{" "}
-                    {money(item.rental_price)} for the week
+                    <span className="font-semibold text-ink">
+                      {money(item.rental_price)} for the week
+                    </span>
                   </p>
                   {item.retail_value != null && Number(item.retail_value) > 0 && (
-                    <p className="mt-0.5 text-[13px] text-ink/45">
+                    <p className="mt-1 text-[15px] font-medium text-ink/55">
                       Retails for {money(item.retail_value)}
                     </p>
                   )}
@@ -472,7 +474,7 @@ export default function Shop() {
           parties and game days — yours for the week.
         </p>
         <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ink/45">
-          <span>Pick her</span>
+          <span>Find your outfit</span>
           <span className="text-blush-deep">·</span>
           <span>Book your week</span>
           <span className="text-blush-deep">·</span>
@@ -575,8 +577,8 @@ export default function Shop() {
                       {item.color ? ` · ${item.color}` : ""}
                     </p>
                     {item.retail_value != null && Number(item.retail_value) > 0 && (
-                      <p className="mt-0.5 text-[12px] text-ink/40">
-                        Retails {money(item.retail_value)}
+                      <p className="mt-1 text-[14px] font-medium text-ink/55">
+                        Retails for {money(item.retail_value)}
                       </p>
                     )}
                   </button>
