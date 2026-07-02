@@ -121,15 +121,16 @@ function BookingSheet({
       onClick={onClose}
     >
       <div
-        className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl"
+        className="max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-t-3xl bg-cream sm:h-[86vh] sm:max-h-[86vh] sm:overflow-hidden sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {(
-          <div className="grid sm:grid-cols-[360px_1fr]">
-            {/* Fixed 3:4 portrait frame on every breakpoint (self-start keeps
-                the grid from stretching it), so proportions stay correct and
-                consistent from piece to piece. */}
-            <div className="relative aspect-[3/4] w-full self-start overflow-hidden bg-lavender/40 sm:rounded-l-3xl">
+          <div className="grid sm:h-full sm:grid-cols-2">
+            {/* Big image on the left (Free People style): a 3:4 portrait frame
+                on mobile, and on desktop it fills the modal's full height while
+                the details scroll beside it — so proportions stay correct and
+                the frame is identical from piece to piece. */}
+            <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 sm:aspect-auto sm:h-full sm:rounded-l-3xl">
               <PhotoCarousel
                 photos={
                   item.photos?.length
@@ -149,7 +150,7 @@ function BookingSheet({
               </button>
             </div>
 
-            <div className="p-6 sm:p-7">
+            <div className="p-6 sm:h-full sm:overflow-y-auto sm:p-7">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="font-serif text-3xl font-semibold leading-tight">
