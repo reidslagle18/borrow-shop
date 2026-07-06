@@ -71,7 +71,6 @@ function BookingSheet({
       }
     } catch {}
   }, []);
-  const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -258,23 +257,11 @@ function BookingSheet({
                 </div>
 
                 <div className="w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-left text-[14px] leading-snug">
-                  <span className="font-medium">
-                    ${CLEANING_FEE} Cleaning &amp; Care Fee
-                  </span>{" "}
+                  <span className="font-medium">{`$${CLEANING_FEE} Cleaning & Care Fee`}</span>{" "}
                   — added to every rental for professional cleaning and standard
                   handling. This is not damage insurance; you&apos;re responsible
                   for repair or replacement of items damaged beyond normal wear,
                   stained beyond cleaning, lost, or not returned.
-                </div>
-
-                <div>
-                  <label className={labelCls}>Anything we should know?</label>
-                  <input
-                    className={inputCls}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="It's for spring formal on Saturday…"
-                  />
                 </div>
 
                 {error && <p className="text-sm text-blush-deep">{error}</p>}
