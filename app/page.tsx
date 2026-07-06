@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import MultiSelect from "@/components/MultiSelect";
+import MarketingPopup from "@/components/MarketingPopup";
 import PhotoCarousel from "@/components/PhotoCarousel";
 import {
   PublicItem,
@@ -628,6 +629,7 @@ export default function Shop() {
       </footer>
 
       {open && <BookingSheet item={open} onClose={() => setOpen(null)} />}
+      <MarketingPopup />
     </main>
   );
 }

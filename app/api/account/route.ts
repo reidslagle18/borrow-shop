@@ -4,6 +4,7 @@ const PATHS: Record<string, string> = {
   signup: "/api/public/signup",
   login: "/api/public/account-login",
   me: "/api/public/account",
+  marketing: "/api/public/marketing",
 };
 
 /** Proxies account actions to the studio — the API key stays server-side. */
