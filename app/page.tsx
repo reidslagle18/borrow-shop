@@ -438,7 +438,14 @@ export default function Shop() {
       )}
 
       {/* Top bar */}
-      <header className="flex items-center justify-end gap-2 px-5 pt-4">
+      <header className="flex items-center justify-between gap-2 px-5 pt-4">
+        <a
+          href="/dropoff"
+          className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] text-ink/70 transition-colors hover:border-ink/35"
+        >
+          Book a drop-off
+        </a>
+        <div className="flex items-center gap-2">
         {hasAccount ? (
           <a
             href="/account"
@@ -462,6 +469,7 @@ export default function Shop() {
             </a>
           </>
         )}
+        </div>
       </header>
 
       {/* Hero */}
