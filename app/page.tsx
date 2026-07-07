@@ -75,12 +75,26 @@ function BookingSheet({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [policyOk, setPolicyOk] = useState(false);
+  const [cleaningFee, setCleaningFee] = useState(6);
+  const [taxRate, setTaxRate] = useState(0);
+
+  // Live fee + tax rate from the studio so the total matches what's charged.
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((c) => {
+        if (c?.cleaning_fee != null) setCleaningFee(Number(c.cleaning_fee));
+        if (c?.sales_tax_rate != null) setTaxRate(Number(c.sales_tax_rate));
+      })
+      .catch(() => {});
+  }, []);
 
   const due = start ? addDays(start, 7) : "";
   const clash = start ? findClash(item.booked, start, due) : null;
-  // Mandatory Cleaning & Care Fee on every rental.
-  const CLEANING_FEE = 6;
-  const total = Number(item.rental_price) + CLEANING_FEE;
+  const CLEANING_FEE = cleaningFee;
+  // Sales tax applies to the rental price only, not the cleaning fee.
+  const taxTotal = Math.round(Number(item.rental_price) * taxRate) / 100;
+  const total = Number(item.rental_price) + CLEANING_FEE + taxTotal;
 
   const upcoming = item.booked
     .filter((b) => b.due_date.slice(0, 10) >= toISO(new Date()))
@@ -268,6 +282,27 @@ function BookingSheet({
                   handling. This is not damage insurance; you&apos;re responsible
                   for repair or replacement of items damaged beyond normal wear,
                   stained beyond cleaning, lost, or not returned.
+                </div>
+
+                <div className="w-full space-y-1 text-[14px] text-ink/60">
+                  <div className="flex justify-between">
+                    <span>Rental</span>
+                    <span>{money(item.rental_price)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Cleaning &amp; Care Fee</span>
+                    <span>{money(CLEANING_FEE)}</span>
+                  </div>
+                  {taxTotal > 0 && (
+                    <div className="flex justify-between">
+                      <span>Sales tax ({taxRate}%)</span>
+                      <span>{money(taxTotal)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between border-t border-ink/10 pt-1 font-medium text-ink">
+                    <span>Total</span>
+                    <span>{money(total)}</span>
+                  </div>
                 </div>
 
                 <div className="w-full rounded-xl bg-butter/30 px-3.5 py-3 text-left text-[13px] leading-relaxed text-ink/70">
