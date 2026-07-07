@@ -115,10 +115,19 @@ export default function PhotoCarousel({
     else if (dx > threshold) go(index - 1);
     else go(index);
   }
-  // Scroll / gesture taken over by the browser — abandon without opening.
+  // The browser took over the gesture (iOS fires this for scrolls AND, often,
+  // mid horizontal-swipe). Finish the swipe from how far we'd dragged
+  // horizontally — but never open the item — so swiping photos still works
+  // while a vertical scroll just snaps back.
   function onCancel() {
+    if (startX.current == null) return;
+    const d = drag;
     startX.current = null;
     setDrag(0);
+    const threshold = Math.min(60, widthRef.current * 0.15);
+    if (d < -threshold) go(index + 1);
+    else if (d > threshold) go(index - 1);
+    else go(index);
   }
 
   const arrowBase =
