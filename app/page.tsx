@@ -74,6 +74,7 @@ function BookingSheet({
   }, []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [policyOk, setPolicyOk] = useState(false);
 
   const due = start ? addDays(start, 7) : "";
   const clash = start ? findClash(item.booked, start, due) : null;
@@ -88,6 +89,10 @@ function BookingSheet({
   async function book() {
     if (!start || !name.trim() || !phone.trim()) {
       setError("Your name, number and a pickup date are required.");
+      return;
+    }
+    if (!policyOk) {
+      setError("Please acknowledge the cancellation policy.");
       return;
     }
     if (clash) return;
@@ -265,11 +270,30 @@ function BookingSheet({
                   stained beyond cleaning, lost, or not returned.
                 </div>
 
+                <div className="w-full rounded-xl bg-butter/30 px-3.5 py-3 text-left text-[13px] leading-relaxed text-ink/70">
+                  <span className="font-medium">Cancellation Policy:</span>{" "}
+                  Reservations canceled 48+ hours before the scheduled pickup date
+                  receive a full refund. Reservations canceled within 48 hours of
+                  pickup will receive store credit for the rental amount. No-shows
+                  and cancellations after pickup are non-refundable, as the item
+                  can no longer be offered to another renter.
+                </div>
+
+                <label className="flex items-start gap-2.5 text-[14px]">
+                  <input
+                    type="checkbox"
+                    checked={policyOk}
+                    onChange={(e) => setPolicyOk(e.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 accent-ink"
+                  />
+                  <span>I understand and agree to the cancellation policy.</span>
+                </label>
+
                 {error && <p className="text-sm text-blush-deep">{error}</p>}
 
                 <button
                   onClick={book}
-                  disabled={saving || !!clash}
+                  disabled={saving || !!clash || !policyOk}
                   className="w-full rounded-full bg-ink px-6 py-4 text-base text-cream transition-opacity disabled:opacity-40"
                 >
                   {saving
