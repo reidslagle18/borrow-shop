@@ -33,6 +33,7 @@ export default function PhotoCarousel({
   const [animate, setAnimate] = useState(true);
   const [drag, setDrag] = useState(0); // live finger/mouse offset in px
   const startX = useRef<number | null>(null);
+  const startY = useRef(0);
   const widthRef = useRef(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +87,7 @@ export default function PhotoCarousel({
 
   function onDown(e: React.PointerEvent) {
     startX.current = e.clientX;
+    startY.current = e.clientY;
     widthRef.current = containerRef.current?.offsetWidth || 1;
     setAnimate(false);
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -94,20 +96,29 @@ export default function PhotoCarousel({
     if (startX.current == null) return;
     setDrag(e.clientX - startX.current);
   }
-  function onUp() {
+  function onUp(e: React.PointerEvent) {
     if (startX.current == null) return;
-    const d = drag;
+    const dx = e.clientX - startX.current;
+    const dy = e.clientY - startY.current;
     startX.current = null;
     setDrag(0);
-    // Tiny movement = a tap: open the item (if onTap) rather than change photo.
-    if (Math.abs(d) <= 8) {
+    // A mostly-vertical move is a page scroll — never open or change photo.
+    if (Math.abs(dy) > 10 && Math.abs(dy) >= Math.abs(dx)) return;
+    // Barely moved at all = a tap → open the item.
+    if (Math.abs(dx) <= 8 && Math.abs(dy) <= 8) {
       if (onTap) onTap();
       return;
     }
+    // Clear horizontal swipe → change photo; small nudge → snap back.
     const threshold = Math.min(60, widthRef.current * 0.15);
-    if (d < -threshold) go(index + 1);
-    else if (d > threshold) go(index - 1);
-    else go(index); // small drag — snap back, don't open
+    if (dx < -threshold) go(index + 1);
+    else if (dx > threshold) go(index - 1);
+    else go(index);
+  }
+  // Scroll / gesture taken over by the browser — abandon without opening.
+  function onCancel() {
+    startX.current = null;
+    setDrag(0);
   }
 
   const arrowBase =
@@ -136,7 +147,7 @@ export default function PhotoCarousel({
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
-        onPointerCancel={onUp}
+        onPointerCancel={onCancel}
         onTransitionEnd={onTransitionEnd}
       >
         {ext.map((src, i) => (
