@@ -15,6 +15,7 @@ export default function PhotoCarousel({
   alt,
   onTap,
   arrowsOnHover = false,
+  hoverPeek = false,
   fit = "cover",
   overlay,
 }: {
@@ -22,6 +23,9 @@ export default function PhotoCarousel({
   alt: string;
   onTap?: () => void;
   arrowsOnHover?: boolean;
+  /** On desktop hover, slide to the 2nd photo (and back on leave) — a quick
+   *  peek at the alternate shot on grid cards. No effect with one photo. */
+  hoverPeek?: boolean;
   fit?: "cover" | "contain";
   overlay?: React.ReactNode;
 }) {
@@ -63,8 +67,13 @@ export default function PhotoCarousel({
     ? "hidden opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:block"
     : "hidden sm:block";
 
+  const peek = hoverPeek && n > 1;
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div
+      className="relative h-full w-full overflow-hidden"
+      onMouseEnter={peek ? () => scrollToIndex(1) : undefined}
+      onMouseLeave={peek ? () => scrollToIndex(0) : undefined}
+    >
       {/* Native horizontal scroll-snap track */}
       <div
         ref={scroller}

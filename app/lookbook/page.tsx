@@ -423,6 +423,7 @@ export default function Lookbook() {
                           alt={`${item.brand} dress`}
                           onTap={() => router.push(href)}
                           arrowsOnHover
+                          hoverPeek
                           overlay={
                             <>
                               <span

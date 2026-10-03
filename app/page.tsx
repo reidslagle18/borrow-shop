@@ -274,6 +274,7 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {featured.map((item) => {
               const cover = item.photos?.[0] || item.photo_url || null;
+              const second = item.photos?.[1] || null;
               return (
                 <Link key={item.id} href={`/shop/${itemSlug(item)}`} className="group text-left">
                   <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
@@ -283,7 +284,18 @@ export default function Home() {
                         src={cover}
                         alt={`${item.brand} dress`}
                         loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        className={`h-full w-full object-cover transition-opacity duration-500 ${
+                          second ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.03]"
+                        }`}
+                      />
+                    )}
+                    {second && (
+                      // Secondary photo fades in on hover. eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={second}
+                        alt={`${item.brand} — alternate view`}
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                       />
                     )}
                   </div>

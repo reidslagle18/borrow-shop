@@ -724,6 +724,7 @@ export default function Shop() {
                       alt={`${item.brand} dress`}
                       onTap={() => router.push(href)}
                       arrowsOnHover
+                      hoverPeek
                       overlay={
                         <span className="pointer-events-none absolute bottom-2.5 right-2.5 z-10 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
                           {money(item.rental_price)}
