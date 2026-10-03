@@ -66,7 +66,7 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
   const textCls = solid ? "text-ink" : "text-cream drop-shadow-sm";
 
   const navLink =
-    "text-[13px] uppercase tracking-[0.14em] transition-opacity hover:opacity-60";
+    "text-[15px] font-medium uppercase tracking-[0.08em] transition-opacity hover:opacity-60";
 
   return (
     <header
@@ -83,15 +83,13 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
           BORROW
         </Link>
 
-        {/* Center links (desktop) */}
-        <nav className={`hidden items-center gap-7 md:flex ${textCls}`}>
-          <Link href="/" className={navLink}>
-            Home
-          </Link>
+        {/* Center links (desktop) — order intentionally differs from the
+            reference site; the logo doubles as Home. */}
+        <nav className={`hidden items-center gap-9 md:flex ${textCls}`}>
           <div className="group relative">
             <Link href="/shop" className={`${navLink} inline-flex items-center gap-1`}>
               Shop Rentals
-              <span className="text-[9px]">▾</span>
+              <span className="text-[10px]">▾</span>
             </Link>
             <div className="invisible absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-3 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
               <div className="grid grid-cols-2 gap-5 rounded-2xl border border-ink/10 bg-cream p-5 text-ink shadow-xl">
@@ -126,10 +124,13 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
               </div>
             </div>
           </div>
+          <Link href="/dropoff" className={navLink}>
+            Rent Out Your Clothes
+          </Link>
           <div className="group relative">
             <span className={`${navLink} inline-flex cursor-default items-center gap-1`}>
               About
-              <span className="text-[9px]">▾</span>
+              <span className="text-[10px]">▾</span>
             </span>
             <div className="invisible absolute left-1/2 top-full z-50 w-56 -translate-x-1/2 pt-3 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
               <ul className="space-y-1.5 rounded-2xl border border-ink/10 bg-cream p-5 text-ink shadow-xl">
@@ -143,9 +144,6 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
               </ul>
             </div>
           </div>
-          <Link href="/dropoff" className={navLink}>
-            Rent Out Your Clothes
-          </Link>
         </nav>
 
         {/* Right icons */}
@@ -171,12 +169,9 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-ink/10 bg-cream px-5 py-4 text-ink md:hidden">
-          <div className="space-y-3">
-            <Link href="/" onClick={() => setMenuOpen(false)} className="block text-[15px]">
-              Home
-            </Link>
-            <Link href="/shop" onClick={() => setMenuOpen(false)} className="block text-[15px] font-medium">
+        <div className="border-t border-ink/10 bg-cream px-5 py-5 text-ink md:hidden">
+          <div className="space-y-3.5">
+            <Link href="/shop" onClick={() => setMenuOpen(false)} className="block text-[17px] font-medium">
               Shop Rentals
             </Link>
             <div className="pl-3">
@@ -201,7 +196,7 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
                 ))}
               </div>
             </div>
-            <Link href="/dropoff" onClick={() => setMenuOpen(false)} className="block text-[15px]">
+            <Link href="/dropoff" onClick={() => setMenuOpen(false)} className="block text-[17px] font-medium">
               Rent Out Your Clothes
             </Link>
             <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-ink/10 pt-3">
