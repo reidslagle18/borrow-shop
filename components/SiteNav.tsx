@@ -63,7 +63,10 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
   }, [transparent]);
 
   const solid = !transparent || scrolled || menuOpen;
-  const textCls = solid ? "text-ink" : "text-cream drop-shadow-sm";
+  // Over a photo hero, a stronger shadow keeps the cream text legible on light shots.
+  const textCls = solid
+    ? "text-ink"
+    : "text-cream [text-shadow:0_1px_10px_rgba(0,0,0,0.55)]";
 
   const navLink =
     "text-[15px] font-medium uppercase tracking-[0.08em] transition-opacity hover:opacity-60";
@@ -74,7 +77,14 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
         solid ? "border-b border-ink/10 bg-cream/95 backdrop-blur" : "bg-transparent"
       }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
+      {/* Readability scrim behind the transparent nav over the hero photo */}
+      {!solid && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink/60 via-ink/25 to-transparent"
+        />
+      )}
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
         {/* Logo */}
         <Link
           href="/"
