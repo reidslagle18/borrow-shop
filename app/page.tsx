@@ -71,6 +71,8 @@ export default function Home() {
   const [reserved, setReserved] = useState<"confirming" | "done" | "error" | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[] | null>(null);
+  const [categoryTileImgs, setCategoryTileImgs] = useState<Record<string, string>>({});
+  const [occasionTileImgs, setOccasionTileImgs] = useState<Record<string, string>>({});
 
   // Hero slides (owner-editable in Settings).
   useEffect(() => {
@@ -78,6 +80,8 @@ export default function Home() {
       .then((r) => (r.ok ? r.json() : null))
       .then((c) => {
         if (Array.isArray(c?.hero) && c.hero.length > 0) setHeroSlides(c.hero as HeroSlide[]);
+        if (c?.category_tiles && typeof c.category_tiles === "object") setCategoryTileImgs(c.category_tiles);
+        if (c?.occasion_tiles && typeof c.occasion_tiles === "object") setOccasionTileImgs(c.occasion_tiles);
       })
       .catch(() => {});
   }, []);
@@ -210,15 +214,25 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {CATEGORY_TILES.map((t) => (
-            <Link
-              key={t.label}
-              href={`/shop?category=${encodeURIComponent(t.label)}`}
-              className={`group flex aspect-[4/5] items-end justify-center overflow-hidden rounded-2xl ${t.cls} p-4 transition-transform hover:scale-[1.02]`}
-            >
-              <span className="font-serif text-xl italic font-medium">{t.label}</span>
-            </Link>
-          ))}
+          {CATEGORY_TILES.map((t) => {
+            const img = categoryTileImgs[t.label];
+            return (
+              <Link
+                key={t.label}
+                href={`/shop?category=${encodeURIComponent(t.label)}`}
+                className={`group relative flex aspect-[4/5] items-end justify-center overflow-hidden rounded-2xl ${img ? "bg-ink" : t.cls} p-4 transition-transform hover:scale-[1.02]`}
+              >
+                {img && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt={t.label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <span className="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/5 to-transparent" />
+                  </>
+                )}
+                <span className={`relative font-serif text-xl italic font-medium ${img ? "text-cream drop-shadow" : ""}`}>{t.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -226,15 +240,25 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 pb-10">
         <h2 className="mb-5 font-serif text-3xl italic font-medium">Shop by Occasion</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {OCCASION_TILES.map((t) => (
-            <Link
-              key={t.label}
-              href={`/shop?occasion=${encodeURIComponent(t.label)}`}
-              className={`group flex aspect-square items-center justify-center overflow-hidden rounded-2xl ${t.cls} p-3 text-center transition-transform hover:scale-[1.02]`}
-            >
-              <span className="font-serif text-lg italic font-medium leading-tight">{t.label}</span>
-            </Link>
-          ))}
+          {OCCASION_TILES.map((t) => {
+            const img = occasionTileImgs[t.label];
+            return (
+              <Link
+                key={t.label}
+                href={`/shop?occasion=${encodeURIComponent(t.label)}`}
+                className={`group relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl ${img ? "bg-ink" : t.cls} p-3 text-center transition-transform hover:scale-[1.02]`}
+              >
+                {img && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt={t.label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <span className="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/10 to-transparent" />
+                  </>
+                )}
+                <span className={`relative font-serif text-lg italic font-medium leading-tight ${img ? "text-cream drop-shadow" : ""}`}>{t.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
