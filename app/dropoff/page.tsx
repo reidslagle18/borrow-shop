@@ -2,19 +2,21 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import SiteFooter from "@/components/SiteFooter";
 
 const inputCls =
   "w-full rounded-xl border border-ink/15 bg-white px-3.5 py-2.5 text-[15px] outline-none focus:border-ink/40";
 const labelCls = "mb-1.5 block text-xs uppercase tracking-[0.15em] text-ink/50";
 
 const GUIDELINES = [
-  "Borrow is a curated closet, so we're selective about what we carry — bring your best, current, on-trend pieces in excellent condition. All items should be clean and ready to rent; we're unable to accept anything stained, damaged, or in need of cleaning.",
-  "We may accept some, all, or none of what you bring in — that's what keeps the closet special.",
-  "Accepted pieces are consigned to you: you earn 60% every time yours rents, and you can retrieve any piece at any time, as long as it isn't currently rented out or reserved.",
+  "Borrow is a curated closet, so we're selective about what we carry, so bring your best, current, on-trend pieces in excellent condition. All items should be clean and ready to rent; we're unable to accept anything stained, damaged, or in need of cleaning.",
+  "We may accept some, all, or none of what you bring in, that's what keeps the closet special.",
+  "Accepted pieces are consigned to you: you earn 20% every time yours rents, and you can retrieve any piece at any time, as long as it isn't currently rented out or reserved.",
 ];
 
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  // Studio-local (America/Chicago) date, not UTC — en-CA formats as YYYY-MM-DD.
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date());
 }
 function prettyTime(t: string): string {
   const [h, m] = t.split(":").map(Number);
@@ -39,7 +41,7 @@ export default function DropoffPage() {
   const [slot, setSlot] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState<{ date: string; time: string; count: number } | null>(null);
+  const [done, setDone] = useState<{ date: string; time: string; count: number; token?: string } | null>(null);
 
   // Load available slots whenever a date is picked.
   useEffect(() => {
@@ -62,34 +64,39 @@ export default function DropoffPage() {
     if (!agreed) return setError("Please check the box to agree to the guidelines.");
     if (!date || !slot) return setError("Pick a day and a time.");
     setBusy(true);
-    const res = await fetch("/api/dropoff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        item_count: Number(count),
-        date,
-        time: slot,
-        agreed: true,
-      }),
-    });
-    const d = await res.json().catch(() => ({}));
-    if (res.ok) {
-      setDone({ date: d.date, time: d.time, count: d.item_count });
-    } else {
-      setError(d.error || "Couldn't book — try again.");
-      if (res.status === 409) {
-        // Slot taken — refresh availability.
-        fetch(`/api/dropoff?date=${date}`)
-          .then((r) => r.json())
-          .then((x) => setSlots(x.slots || []))
-          .catch(() => {});
-        setSlot("");
+    try {
+      const res = await fetch("/api/dropoff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          item_count: Number(count),
+          date,
+          time: slot,
+          agreed: true,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setDone({ date: d.date, time: d.time, count: d.item_count, token: d.manage_token });
+      } else {
+        setError(d.error || "Couldn't book, try again.");
+        if (res.status === 409) {
+          // Slot taken, refresh availability.
+          fetch(`/api/dropoff?date=${date}`)
+            .then((r) => r.json())
+            .then((x) => setSlots(x.slots || []))
+            .catch(() => {});
+          setSlot("");
+        }
       }
+    } catch {
+      setError("We couldn't reach BORROW. Check your connection and try again.");
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   return (
@@ -118,6 +125,18 @@ export default function DropoffPage() {
             We emailed you a confirmation with the details and guidelines. See you
             then! Bring your best clean, on-trend pieces.
           </p>
+          {done.token && (
+            <p className="mt-4 text-[14px] leading-relaxed text-ink/70">
+              Need to change your plans?{" "}
+              <Link
+                href={`/dropoff/manage?token=${encodeURIComponent(done.token)}`}
+                className="font-medium underline underline-offset-2"
+              >
+                Reschedule or cancel this appointment
+              </Link>
+              . The same link is in your email.
+            </p>
+          )}
           <Link
             href="/"
             className="mt-7 inline-block rounded-full bg-ink px-7 py-3 text-[15px] text-cream"
@@ -189,7 +208,7 @@ export default function DropoffPage() {
                 <p className="text-sm text-ink/45">Loading times…</p>
               ) : slots.length === 0 ? (
                 <p className="rounded-xl bg-blush/25 px-4 py-3 text-sm text-ink/70">
-                  No openings that day — please pick another.
+                  No openings that day, please pick another.
                 </p>
               ) : (
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -228,9 +247,7 @@ export default function DropoffPage() {
         </div>
       )}
 
-      <footer className="mt-16 pb-6 text-center text-[12px] uppercase tracking-[0.25em] text-ink/35">
-        <Link href="/">← Back to the closet</Link>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

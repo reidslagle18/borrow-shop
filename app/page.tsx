@@ -1,379 +1,109 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import MultiSelect from "@/components/MultiSelect";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import MarketingPopup from "@/components/MarketingPopup";
-import PhotoCarousel from "@/components/PhotoCarousel";
-import {
-  PublicItem,
-  EVENT_TYPES,
-  SIZES,
-  toISO,
-  addDays,
-  fmtShort,
-  findClash,
-} from "@/lib/types";
+import Reveal from "@/components/Reveal";
+import SiteFooter from "@/components/SiteFooter";
+import SiteNav from "@/components/SiteNav";
+import HeroMedia, { type HeroSlide } from "@/components/HeroMedia";
+import TrustBadges from "@/components/TrustBadges";
+import Testimonials, { type Testimonial } from "@/components/Testimonials";
+import { PublicItem, itemSlug } from "@/lib/types";
 
-/** Split a piece's comma-joined color string into individual colors. */
-function itemColors(i: PublicItem): string[] {
-  return (i.color || "").split(",").map((c) => c.trim()).filter(Boolean);
-}
+/* ---------------------------------------------------------------------------
+   REDESIGN PREVIEW — clean "landing" homepage. Browsing lives on /shop.
+   Marketing photography lists mirror the originals; swap paths as you add more.
+--------------------------------------------------------------------------- */
+const HERO_IMAGES: string[] = [
+  "/store/space.jpg",
+  "/store/sign.jpg",
+  "/store/gowns.jpg",
+];
+const HERO_VIDEO = "";
 
-const SILHOUETTE_ORDER = [
-  "Mini Dress",
-  "Midi Dress",
-  "Maxi Dress",
-  "Gown",
-  "Two-Piece",
-  "Top",
-  "Skirt",
-  "Pants",
-  "Jumpsuit",
-  "Co-ord",
-  "Outerwear",
-  "Accessory",
+const STUDIO_GALLERY: { src: string; alt: string }[] = [
+  { src: "/store/gallery/rainbow.jpg", alt: "Dresses arranged by color against the forest mural" },
+  { src: "/store/gallery/beaded.jpg", alt: "A beaded gown and pastel pieces on the Lemon Park wall" },
+  { src: "/store/gallery/fitting-room.jpg", alt: "The floral fitting room with a gold sconce and mirror" },
+  { src: "/store/gallery/owner-table.jpg", alt: "Browsing the racks at the BORROW studio" },
 ];
 
-const inputCls =
-  "w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-base outline-none focus:border-ink/40";
-const labelCls = "mb-1.5 block text-xs uppercase tracking-[0.18em] text-ink/50";
+const TESTIMONIALS: Testimonial[] = [
+  { name: "Placeholder — Ella R.", detail: "U of A '25", stars: 5, quote: "Found the perfect formal dress in ten minutes and paid a fraction of buying it. Pickup was so easy and it was spotless." },
+  { name: "Placeholder — Maggie T.", detail: "Fayetteville", stars: 5, quote: "I've rented three times now for gamedays and a wedding. Way better than my closet full of dresses I wore once." },
+  { name: "Placeholder — Sydney K.", detail: "U of A '26", stars: 5, quote: "The pieces are actually cute and current, not random. Borrow is my go-to for every date party now." },
+];
+
+const FAQS = [
+  { q: "How does sizing work?", a: "Every piece lists its size on the tag and its page, and you can filter the closet by your size. Sizes run true to the brand's own sizing, and we note fit quirks in the piece's description when they matter." },
+  { q: "What if it doesn't fit?", a: "Try it on at pickup, and if it isn't right we'll help you find a piece that is. Reservations are paid in full to hold the piece; cancel 48 or more hours before pickup and the rental price is refunded to your card (tax is non-refundable). Within 48 hours of pickup, no-shows, and after pickup are non-refundable." },
+  { q: "What's the Cleaning & Care Fee?", a: "It's already included in every rental price, so there's nothing extra to add at checkout. It covers professional cleaning and inspection between wears, so every piece arrives fresh. Please don't clean the piece yourself; just return it as-is and we take care of all cleaning." },
+  { q: "What if I return it late?", a: "Pieces are due back by day 7 so the next renter isn't left waiting. Late returns are charged $15 per item per day to the card on file, capped at the piece's replacement value." },
+  { q: "How does consignment work?", a: "Bring us the pieces you never reach for; we photograph, list, rent, and clean them, and you earn 20% of every rental, paid straight to your bank. Book a drop-off appointment to get started, and you can retrieve your pieces anytime they aren't rented or reserved." },
+];
+
+/* Shop-by tiles → deep-link into /shop with the filter pre-applied. Color-block
+   tiles for now (no per-category photos needed); swap to imagery anytime. */
+const CATEGORY_TILES: { label: string; cls: string }[] = [
+  { label: "Dresses", cls: "bg-blush/55" },
+  { label: "Sets", cls: "bg-sage/45" },
+  { label: "Tops", cls: "bg-lavender/60" },
+  { label: "Skirts", cls: "bg-butter/70" },
+  { label: "Pants", cls: "bg-blush/35" },
+];
+const OCCASION_TILES: { label: string; cls: string }[] = [
+  { label: "Vacation", cls: "bg-sage/45" },
+  { label: "Gameday", cls: "bg-blush/55" },
+  { label: "Date Night", cls: "bg-lavender/60" },
+  { label: "Formal", cls: "bg-butter/70" },
+  { label: "Wedding Guest", cls: "bg-blush/35" },
+  { label: "Graduation", cls: "bg-sage/35" },
+];
 
 function money(n: number | string): string {
   return `$${Number(n)}`;
 }
 
-function tomorrowISO(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return toISO(d);
-}
+export default function Home() {
+  const [items, setItems] = useState<PublicItem[] | null>(null);
+  const [reserved, setReserved] = useState<"confirming" | "done" | "error" | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[] | null>(null);
 
-function BookingSheet({
-  item,
-  onClose,
-}: {
-  item: PublicItem;
-  onClose: () => void;
-}) {
-  const [start, setStart] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-
-  // logged-in shoppers don't retype their info
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("borrow_profile");
-      if (saved) {
-        const p = JSON.parse(saved);
-        if (p.name) setName(p.name);
-        if (p.phone) setPhone(p.phone);
-        if (p.email) setEmail(p.email);
-      }
-    } catch {}
-  }, []);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [policyOk, setPolicyOk] = useState(false);
-  const [cleaningFee, setCleaningFee] = useState(6);
-  const [taxRate, setTaxRate] = useState(0);
-
-  // Live fee + tax rate from the studio so the total matches what's charged.
+  // Hero slides (owner-editable in Settings).
   useEffect(() => {
     fetch("/api/config")
       .then((r) => (r.ok ? r.json() : null))
       .then((c) => {
-        if (c?.cleaning_fee != null) setCleaningFee(Number(c.cleaning_fee));
-        if (c?.sales_tax_rate != null) setTaxRate(Number(c.sales_tax_rate));
+        if (Array.isArray(c?.hero) && c.hero.length > 0) setHeroSlides(c.hero as HeroSlide[]);
       })
       .catch(() => {});
   }, []);
 
-  const due = start ? addDays(start, 7) : "";
-  const clash = start ? findClash(item.booked, start, due) : null;
-  const CLEANING_FEE = cleaningFee;
-  // Sales tax applies to the rental price only, not the cleaning fee.
-  const taxTotal = Math.round(Number(item.rental_price) * taxRate) / 100;
-  const total = Number(item.rental_price) + CLEANING_FEE + taxTotal;
-
-  const upcoming = item.booked
-    .filter((b) => b.due_date.slice(0, 10) >= toISO(new Date()))
-    .slice(0, 4);
-
-  async function book() {
-    if (!start || !name.trim() || !phone.trim()) {
-      setError("Your name, number and a pickup date are required.");
-      return;
-    }
-    if (!policyOk) {
-      setError("Please acknowledge the cancellation policy.");
-      return;
-    }
-    if (clash) return;
-    setSaving(true);
-    setError("");
-    // Pay online to reserve — get a Stripe Checkout URL and send them there.
-    const res = await fetch("/api/pay", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        item_id: item.id,
-        start_date: start,
-        due_date: due,
-        name,
-        phone,
-        email,
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data.url) {
-      window.location.href = data.url; // off to Stripe Checkout
-      return;
-    }
-    setError(data.error || "Couldn't start checkout — try again.");
-    setSaving(false);
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/45 sm:items-center sm:p-6"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[94vh] w-full max-w-4xl overflow-y-auto rounded-t-3xl bg-cream sm:rounded-3xl lg:h-[86vh] lg:max-h-[86vh] lg:overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {(
-          <div className="grid lg:h-full lg:grid-cols-2">
-            {/* Phones + iPad-portrait: a clean 3:4 image stacked above the form
-                (whole sheet scrolls). Desktop / landscape: the image fills the
-                modal's full height while the details scroll beside it. Same
-                frame proportions everywhere — never stretched. */}
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-lavender/40 lg:aspect-auto lg:h-full lg:rounded-l-3xl">
-              <PhotoCarousel
-                photos={
-                  item.photos?.length
-                    ? item.photos
-                    : item.photo_url
-                      ? [item.photo_url]
-                      : []
-                }
-                alt={`${item.brand} dress`}
-              />
-              <button
-                onClick={onClose}
-                className="absolute right-3 top-3 z-10 rounded-full bg-cream/90 px-3 py-1 text-xl leading-none text-ink/60 lg:hidden"
-                aria-label="Close"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="p-6 lg:h-full lg:overflow-y-auto lg:p-7">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="font-serif text-3xl font-semibold leading-tight">
-                    {item.brand}
-                  </h2>
-                  <p className="mt-1 text-sm text-ink/55">
-                    Size {item.size}
-                    {item.color ? ` · ${item.color}` : ""} ·{" "}
-                    <span className="font-semibold text-ink">
-                      {money(item.rental_price)} for the week
-                    </span>
-                  </p>
-                  {item.retail_value != null && Number(item.retail_value) > 0 && (
-                    <p className="mt-1 text-[15px] font-medium text-ink/55">
-                      Retails for {money(item.retail_value)}
-                    </p>
-                  )}
-                  {item.event_types.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {item.event_types.map((ev) => (
-                        <span
-                          key={ev}
-                          className="rounded-full bg-lavender/60 px-2.5 py-0.5 text-[11px]"
-                        >
-                          {ev}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={onClose}
-                  className="hidden rounded-full px-3 py-1 text-2xl leading-none text-ink/40 hover:bg-ink/5 lg:block"
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="mt-5 space-y-4">
-                <div>
-                  <label className={labelCls}>Pickup day</label>
-                  <input
-                    type="date"
-                    min={tomorrowISO()}
-                    className={inputCls}
-                    value={start}
-                    onChange={(e) => setStart(e.target.value)}
-                  />
-                  {start && !clash && (
-                    <p className="mt-1.5 text-[13px] text-ink/55">
-                      Yours {fmtShort(start)} – {fmtShort(due)} · back by{" "}
-                      {fmtShort(due)} to skip late fees ($15/day)
-                    </p>
-                  )}
-                  {clash && (
-                    <p className="mt-1.5 rounded-xl bg-blush/30 px-3 py-2 text-[13px]">
-                      She&apos;s spoken for {fmtShort(clash.start_date)} –{" "}
-                      {fmtShort(clash.due_date)} — pick another week.
-                    </p>
-                  )}
-                  {upcoming.length > 0 && !clash && (
-                    <p className="mt-1.5 text-[12px] text-ink/45">
-                      Already taken:{" "}
-                      {upcoming
-                        .map(
-                          (b) =>
-                            `${fmtShort(b.start_date)}–${fmtShort(b.due_date)}`
-                        )
-                        .join(", ")}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 sm:col-span-1">
-                    <label className={labelCls}>Name *</label>
-                    <input
-                      className={inputCls}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      autoComplete="name"
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label className={labelCls}>Phone *</label>
-                    <input
-                      type="tel"
-                      className={inputCls}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      autoComplete="tel"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className={labelCls}>Email</label>
-                    <input
-                      type="email"
-                      className={inputCls}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                    />
-                  </div>
-                </div>
-
-                <div className="w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-left text-[14px] leading-snug">
-                  <span className="font-medium">{`$${CLEANING_FEE} Cleaning & Care Fee`}</span>{" "}
-                  — added to every rental for professional cleaning and standard
-                  handling. This is not damage insurance; you&apos;re responsible
-                  for repair or replacement of items damaged beyond normal wear,
-                  stained beyond cleaning, lost, or not returned.
-                </div>
-
-                <div className="w-full space-y-1 text-[14px] text-ink/60">
-                  <div className="flex justify-between">
-                    <span>Rental</span>
-                    <span>{money(item.rental_price)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Cleaning &amp; Care Fee</span>
-                    <span>{money(CLEANING_FEE)}</span>
-                  </div>
-                  {taxTotal > 0 && (
-                    <div className="flex justify-between">
-                      <span>Sales tax ({taxRate}%)</span>
-                      <span>{money(taxTotal)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between border-t border-ink/10 pt-1 font-medium text-ink">
-                    <span>Total</span>
-                    <span>{money(total)}</span>
-                  </div>
-                </div>
-
-                <div className="w-full rounded-xl bg-butter/30 px-3.5 py-3 text-left text-[13px] leading-relaxed text-ink/70">
-                  <span className="font-medium">Cancellation Policy:</span>{" "}
-                  Reservations canceled 48+ hours before the scheduled pickup date
-                  receive a full refund. Reservations canceled within 48 hours of
-                  pickup will receive store credit for the rental amount. No-shows
-                  and cancellations after pickup are non-refundable, as the item
-                  can no longer be offered to another renter.
-                </div>
-
-                <label className="flex items-start gap-2.5 text-[14px]">
-                  <input
-                    type="checkbox"
-                    checked={policyOk}
-                    onChange={(e) => setPolicyOk(e.target.checked)}
-                    className="mt-1 h-4 w-4 shrink-0 accent-ink"
-                  />
-                  <span>I understand and agree to the cancellation policy.</span>
-                </label>
-
-                {error && <p className="text-sm text-blush-deep">{error}</p>}
-
-                <button
-                  onClick={book}
-                  disabled={saving || !!clash || !policyOk}
-                  className="w-full rounded-full bg-ink px-6 py-4 text-base text-cream transition-opacity disabled:opacity-40"
-                >
-                  {saving
-                    ? "Taking you to checkout…"
-                    : `Pay & reserve · ${money(total)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default function Shop() {
-  const [items, setItems] = useState<PublicItem[] | null>(null);
-  const [error, setError] = useState("");
-  const [fSizes, setFSizes] = useState<string[]>([]);
-  const [fColors, setFColors] = useState<string[]>([]);
-  const [fSilhouettes, setFSilhouettes] = useState<string[]>([]);
-  const [fEvents, setFEvents] = useState<string[]>([]);
-  const [sort, setSort] = useState("featured");
-  const [open, setOpen] = useState<PublicItem | null>(null);
-  const [hasAccount, setHasAccount] = useState(false);
-  const [reserved, setReserved] = useState<"confirming" | "done" | "error" | null>(null);
-
+  // Featured pieces — most-loved first (same feed the closet uses).
   useEffect(() => {
-    setHasAccount(!!localStorage.getItem("borrow_account_token"));
     (async () => {
       try {
         const res = await fetch("/api/collection");
-        if (!res.ok) throw new Error();
-        setItems(await res.json());
+        if (res.ok) setItems(await res.json());
       } catch {
-        setError("The closet didn't load — refresh to try again.");
+        /* featured just stays empty */
       }
     })();
   }, []);
 
-  // Returning from Stripe Checkout (?reserved=<session_id>) — confirm the reservation.
+  // Returning from Stripe Checkout (?reserved=<session_id>), confirm the reservation.
   useEffect(() => {
     const sessionId = new URLSearchParams(window.location.search).get("reserved");
     if (!sessionId) return;
     setReserved("confirming");
+    if (sessionId === "credit") {
+      setReserved("done");
+      window.history.replaceState({}, "", "/");
+      return;
+    }
     (async () => {
       try {
         const res = await fetch("/api/fulfill", {
@@ -389,54 +119,7 @@ export default function Shop() {
     })();
   }, []);
 
-  const sizeOptions = useMemo(() => {
-    const present = new Set((items ?? []).map((i) => i.size));
-    return SIZES.filter((s) => present.has(s));
-  }, [items]);
-
-  const colorOptions = useMemo(() => {
-    const set = new Set<string>();
-    (items ?? []).forEach((i) => itemColors(i).forEach((c) => set.add(c)));
-    return Array.from(set).sort();
-  }, [items]);
-
-  const silhouetteOptions = useMemo(() => {
-    const present = new Set(
-      (items ?? []).map((i) => i.silhouette).filter(Boolean) as string[]
-    );
-    const ordered = SILHOUETTE_ORDER.filter((s) => present.has(s));
-    const extras = Array.from(present)
-      .filter((s) => !SILHOUETTE_ORDER.includes(s))
-      .sort();
-    return [...ordered, ...extras];
-  }, [items]);
-
-  const eventOptions = useMemo(() => {
-    const present = new Set<string>();
-    (items ?? []).forEach((i) => (i.event_types || []).forEach((e) => present.add(e)));
-    const ordered = EVENT_TYPES.filter((e) => present.has(e));
-    const extras = Array.from(present).filter((e) => !EVENT_TYPES.includes(e)).sort();
-    return [...ordered, ...extras];
-  }, [items]);
-
-  const list = useMemo(() => {
-    let l = items ?? [];
-    if (fSizes.length) l = l.filter((i) => fSizes.includes(i.size));
-    if (fColors.length)
-      l = l.filter((i) => itemColors(i).some((c) => fColors.includes(c)));
-    if (fSilhouettes.length)
-      l = l.filter((i) => !!i.silhouette && fSilhouettes.includes(i.silhouette));
-    if (fEvents.length)
-      l = l.filter((i) => (i.event_types || []).some((e) => fEvents.includes(e)));
-    if (sort === "price-asc")
-      l = [...l].sort((a, b) => Number(a.rental_price) - Number(b.rental_price));
-    else if (sort === "price-desc")
-      l = [...l].sort((a, b) => Number(b.rental_price) - Number(a.rental_price));
-    return l;
-  }, [items, fSizes, fColors, fSilhouettes, fEvents, sort]);
-
-  const anyFilter =
-    fSizes.length || fColors.length || fSilhouettes.length || fEvents.length;
+  const featured = (items ?? []).slice(0, 8);
 
   return (
     <main>
@@ -445,90 +128,71 @@ export default function Shop() {
           className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/45 p-6"
           onClick={() => reserved !== "confirming" && setReserved(null)}
         >
-          <div
-            className="w-full max-w-sm rounded-3xl bg-cream p-8 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="w-full max-w-sm rounded-3xl bg-cream p-8 text-center" onClick={(e) => e.stopPropagation()}>
             {reserved === "confirming" ? (
               <p className="text-[15px] text-ink/60">Confirming your reservation…</p>
             ) : reserved === "done" ? (
               <>
                 <h2 className="font-serif text-4xl italic font-medium">You&apos;re reserved.</h2>
                 <p className="mx-auto mt-4 max-w-xs text-[15px] leading-relaxed text-ink/60">
-                  Payment received and your piece is held. We&apos;ll email your
-                  confirmation and a pickup reminder — all you have to do is pick it up.
+                  Payment received and your piece is held. We&apos;ll email your confirmation and a pickup reminder, and all you have to do is pick it up.
                 </p>
-                <button
-                  onClick={() => setReserved(null)}
-                  className="mt-7 rounded-full bg-ink px-8 py-3.5 text-base text-cream"
-                >
-                  Done
-                </button>
+                <button onClick={() => setReserved(null)} className="mt-7 rounded-full bg-ink px-8 py-3.5 text-base text-cream">Done</button>
               </>
             ) : (
               <>
-                <h2 className="font-serif text-3xl italic font-medium">Hmm — one sec.</h2>
+                <h2 className="font-serif text-3xl italic font-medium">Hmm, one sec.</h2>
                 <p className="mx-auto mt-3 max-w-xs text-[15px] leading-relaxed text-ink/60">
-                  Your payment may have gone through but we couldn&apos;t confirm the
-                  reservation here. Please text BORROW and we&apos;ll sort it right away.
+                  Your payment may have gone through but we couldn&apos;t confirm the reservation here. Please DM @borrowfayetteville on Instagram and we&apos;ll sort it right away.
                 </p>
-                <button
-                  onClick={() => setReserved(null)}
-                  className="mt-6 rounded-full border border-ink/15 px-6 py-3 text-[15px] text-ink/60"
-                >
-                  Close
-                </button>
+                <button onClick={() => setReserved(null)} className="mt-6 rounded-full border border-ink/15 px-6 py-3 text-[15px] text-ink/60">Close</button>
               </>
             )}
           </div>
         </div>
       )}
 
-      {/* Top bar */}
-      <header className="flex items-center justify-between gap-2 px-5 pt-4">
-        <a
-          href="/dropoff"
-          className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] text-ink/70 transition-colors hover:border-ink/35"
-        >
-          Book a drop-off
-        </a>
-        <div className="flex items-center gap-2">
-        {hasAccount ? (
-          <a
-            href="/account"
-            className="rounded-full bg-ink px-4 py-2 text-[13px] text-cream"
-          >
-            My account
-          </a>
-        ) : (
-          <>
-            <a
-              href="/account"
-              className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] text-ink/70 transition-colors hover:border-ink/35"
-            >
-              Log in
-            </a>
-            <a
-              href="/account?signup=1"
-              className="rounded-full bg-ink px-4 py-2 text-[13px] text-cream"
-            >
-              Sign up
-            </a>
-          </>
-        )}
-        </div>
-      </header>
+      <SiteNav transparent />
 
       {/* Hero */}
-      <section className="px-6 pb-10 pt-6 text-center sm:pt-12">
-        <h1 className="font-serif text-6xl italic font-medium tracking-tight sm:text-7xl">
-          BORROW
-        </h1>
-        <p className="mx-auto mt-4 max-w-md text-[17px] leading-relaxed text-ink/65">
-          Rent the dress, keep the night. A curated closet for formals, date
-          parties and game days — yours for the week.
+      <section className="relative -mt-[68px]">
+        <HeroMedia images={HERO_IMAGES} slides={heroSlides ?? undefined} video={HERO_VIDEO || undefined}>
+          <div className="animate-rise absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            <h1 className="font-serif text-6xl italic font-medium tracking-tight text-cream drop-shadow-sm sm:text-8xl">
+              BORROW
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-cream/90 sm:text-[18px]">
+              Rent your outfit, save the stress.
+            </p>
+            <Link
+              href="/shop"
+              className="mt-7 rounded-full bg-cream/95 px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-ink transition-transform hover:scale-[1.03]"
+            >
+              Shop Rentals
+            </Link>
+          </div>
+        </HeroMedia>
+        {/* Scalloped bottom edge */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-4 bg-cream sm:h-5"
+          style={{
+            WebkitMaskImage: "radial-gradient(circle at 10px bottom, transparent 10px, black 10.5px)",
+            maskImage: "radial-gradient(circle at 10px bottom, transparent 10px, black 10.5px)",
+            WebkitMaskRepeat: "repeat-x",
+            maskRepeat: "repeat-x",
+            WebkitMaskSize: "20px 20px",
+            maskSize: "20px 20px",
+          }}
+        />
+      </section>
+
+      {/* Intro line */}
+      <section className="px-6 pb-4 pt-10 text-center">
+        <p className="mx-auto max-w-md text-[17px] leading-relaxed text-ink/65">
+          A curated closet for formals, date parties, wedding guests, game days, and more, yours for the week.
         </p>
-        <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ink/45">
+        <div className="mx-auto mt-5 flex max-w-md items-center justify-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ink/45">
           <span>Find your outfit</span>
           <span className="text-blush-deep">·</span>
           <span>Book your week</span>
@@ -537,157 +201,241 @@ export default function Shop() {
         </div>
       </section>
 
-      {/* Filters + sort */}
-      <section className="sticky top-0 z-30 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
-          <MultiSelect label="Event" options={eventOptions} selected={fEvents} onChange={setFEvents} />
-          <MultiSelect label="Size" options={sizeOptions} selected={fSizes} onChange={setFSizes} />
-          <MultiSelect label="Color" options={colorOptions} selected={fColors} onChange={setFColors} />
-          <MultiSelect label="Silhouette" options={silhouetteOptions} selected={fSilhouettes} onChange={setFSilhouettes} />
-          {anyFilter ? (
-            <button
-              onClick={() => {
-                setFEvents([]);
-                setFSizes([]);
-                setFColors([]);
-                setFSilhouettes([]);
-              }}
-              className="text-sm text-ink/45 underline underline-offset-2"
+      {/* Shop by Category */}
+      <section className="mx-auto max-w-6xl px-5 py-10">
+        <div className="mb-5 flex items-end justify-between">
+          <h2 className="font-serif text-3xl italic font-medium">Shop by Category</h2>
+          <Link href="/shop" className="text-[13px] text-ink/50 underline-offset-2 hover:underline">
+            View all →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {CATEGORY_TILES.map((t) => (
+            <Link
+              key={t.label}
+              href={`/shop?category=${encodeURIComponent(t.label)}`}
+              className={`group flex aspect-[4/5] items-end justify-center overflow-hidden rounded-2xl ${t.cls} p-4 transition-transform hover:scale-[1.02]`}
             >
-              Clear
-            </button>
-          ) : null}
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="ml-auto rounded-full border border-ink/15 bg-white px-3.5 py-2 text-sm outline-none"
-          >
-            <option value="featured">Featured</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-          </select>
+              <span className="font-serif text-xl italic font-medium">{t.label}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* Grid */}
-      <section className="mx-auto max-w-5xl px-5 py-8">
-        {error ? (
-          <p className="py-20 text-center text-ink/50">{error}</p>
-        ) : items === null ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-[3/4] animate-pulse rounded-2xl bg-ink/5"
-              />
-            ))}
+      {/* Shop by Occasion */}
+      <section className="mx-auto max-w-6xl px-5 pb-10">
+        <h2 className="mb-5 font-serif text-3xl italic font-medium">Shop by Occasion</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          {OCCASION_TILES.map((t) => (
+            <Link
+              key={t.label}
+              href={`/shop?occasion=${encodeURIComponent(t.label)}`}
+              className={`group flex aspect-square items-center justify-center overflow-hidden rounded-2xl ${t.cls} p-3 text-center transition-transform hover:scale-[1.02]`}
+            >
+              <span className="font-serif text-lg italic font-medium leading-tight">{t.label}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Featured pieces */}
+      {featured.length > 0 && (
+        <section className="mx-auto max-w-6xl px-5 py-10">
+          <div className="mb-5 flex items-end justify-between">
+            <h2 className="font-serif text-3xl italic font-medium">Featured</h2>
+            <Link href="/shop" className="text-[13px] text-ink/50 underline-offset-2 hover:underline">
+              Shop all rentals →
+            </Link>
           </div>
-        ) : list.length === 0 ? (
-          <div className="py-20 text-center">
-            <p className="font-serif text-3xl italic text-ink/40">
-              {items.length === 0
-                ? "The closet is being stocked"
-                : "Nothing in that filter — yet"}
-            </p>
-            <p className="mt-2 text-sm text-ink/45">
-              {items.length === 0
-                ? "Check back soon — new pieces drop weekly."
-                : "Try clearing a filter or two."}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {list.map((item) => {
-              const cardPhotos = item.photos?.length
-                ? item.photos
-                : item.photo_url
-                  ? [item.photo_url]
-                  : [];
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {featured.map((item) => {
+              const cover = item.photos?.[0] || item.photo_url || null;
               return (
-                <div key={item.id} className="group text-left">
-                  {/* Fixed 3:4 frame — stays put as photos change; swipe/arrows
-                      browse, a plain tap opens the item. */}
+                <Link key={item.id} href={`/shop/${itemSlug(item)}`} className="group text-left">
                   <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
-                    <PhotoCarousel
-                      photos={cardPhotos}
-                      alt={`${item.brand} dress`}
-                      onTap={() => setOpen(item)}
-                      arrowsOnHover
-                      overlay={
-                        <span className="pointer-events-none absolute bottom-2.5 right-2.5 z-10 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
-                          {money(item.rental_price)}
-                        </span>
-                      }
-                    />
-                  </div>
-                  <button
-                    onClick={() => setOpen(item)}
-                    className="block w-full px-1 pt-2.5 text-left"
-                  >
-                    <p className="truncate font-serif text-lg font-semibold leading-tight">
-                      {item.brand}
-                    </p>
-                    <p className="mt-0.5 text-[13px] text-ink/50">
-                      Size {item.size}
-                      {item.color ? ` · ${item.color}` : ""}
-                    </p>
-                    {item.retail_value != null && Number(item.retail_value) > 0 && (
-                      <p className="mt-1 text-[14px] font-medium text-ink/55">
-                        Retails for {money(item.retail_value)}
-                      </p>
+                    {cover && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={cover}
+                        alt={`${item.brand} dress`}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
                     )}
+                  </div>
+                  <p className="mt-2.5 truncate font-serif text-lg font-semibold leading-tight">{item.brand}</p>
+                  <p className="mt-0.5 text-[14px] text-ink/55">{money(item.rental_price)}</p>
+                </Link>
+              );
+            })}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/shop"
+              className="inline-block rounded-full bg-ink px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-cream transition-transform hover:scale-[1.03]"
+            >
+              Shop all rentals
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Consign / drop-off call-out */}
+      <section className="px-5 py-10">
+        <Reveal className="mx-auto max-w-5xl">
+          <div className="flex flex-col items-center gap-5 rounded-3xl bg-blush/45 px-6 py-8 text-center sm:flex-row sm:justify-between sm:gap-8 sm:px-10 sm:text-left">
+            <div>
+              <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">Consign with Borrow</p>
+              <h2 className="mt-1.5 font-serif text-2xl italic font-medium sm:text-3xl">Have pieces to drop off?</h2>
+              <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-ink/65">
+                Bring in the dresses you&apos;re done with, and you earn 20% every time one rents. Book a quick appointment and we&apos;ll handle the rest.
+              </p>
+            </div>
+            <a href="/dropoff" className="inline-block w-full shrink-0 rounded-full bg-ink px-8 py-4 text-center text-[15px] font-medium text-cream transition-transform hover:scale-[1.03] sm:w-auto">
+              Rent out your clothes →
+            </a>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* How it works */}
+      <section className="border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+        <Reveal>
+          <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
+            <div>
+              <p className="font-serif text-3xl italic text-blush-deep">1</p>
+              <h3 className="mt-1 text-xl font-medium">Pick your favorite</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink/55">Browse the closet by event or size. Every piece is cleaned and inspected between wears.</p>
+            </div>
+            <div>
+              <p className="font-serif text-3xl italic text-blush-deep">2</p>
+              <h3 className="mt-1 text-xl font-medium">Book your week</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink/55">Choose your pickup day, and the dress is yours for 7 days. Pay at pickup.</p>
+            </div>
+            <div>
+              <p className="font-serif text-3xl italic text-blush-deep">3</p>
+              <h3 className="mt-1 text-xl font-medium">Wear &amp; return</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink/55">Live your night, bring her back by day 7. Late returns run $15/day, don&apos;t do her like that.</p>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Trust / reassurance row */}
+      <section className="border-t border-ink/10 bg-white/50 px-6 py-10 sm:py-12">
+        <Reveal>
+          <TrustBadges />
+        </Reveal>
+      </section>
+
+      {/* Studio gallery */}
+      {STUDIO_GALLERY.length > 0 && (
+        <section className="border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+          <Reveal className="mx-auto max-w-6xl">
+            <div className="text-center">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">A look inside</p>
+              <h2 className="mt-1.5 font-serif text-4xl italic font-medium">The studio</h2>
+            </div>
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+              {STUDIO_GALLERY.map((photo) => (
+                <div key={photo.src} className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/20">
+                  <Image src={photo.src} alt={photo.alt} fill loading="lazy" sizes="(min-width: 640px) 25vw, 50vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </section>
+      )}
+
+      {/* Find us / Store Hours & Location (anchor: #visit) */}
+      <section id="visit" className="scroll-mt-20 border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+        <Reveal className="mx-auto max-w-5xl">
+          <div className="grid items-center gap-8 sm:grid-cols-2 lg:gap-12">
+            <div className="order-2 text-center sm:order-1 sm:text-left">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">Store Hours &amp; Location</p>
+              <h2 className="mt-1.5 font-serif text-4xl italic font-medium">Come visit</h2>
+              <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink/60 sm:mx-0">
+                2171 Main Dr, Fayetteville, AR. Browse in person or pick up your reservation, we&apos;re right here in Fayetteville.
+              </p>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=2171+Main+Dr,+Fayetteville,+AR" target="_blank" rel="noopener noreferrer" className="mt-6 inline-block rounded-full bg-ink px-6 py-3 text-[14px] text-cream transition-transform hover:scale-[1.03]">
+                Get directions →
+              </a>
+            </div>
+            <div className="order-1 space-y-4 sm:order-2">
+              <div className="relative aspect-[3/2] overflow-hidden rounded-3xl border border-ink/10">
+                <Image src="/store/storefront.jpg" alt="The BORROW storefront entrance in Fayetteville" fill loading="lazy" sizes="(min-width: 640px) 50vw, 100vw" className="object-cover" />
+              </div>
+              <div className="overflow-hidden rounded-3xl border border-ink/10">
+                <iframe title="Map to the BORROW studio at 2171 Main Dr, Fayetteville, AR" src="https://maps.google.com/maps?q=2171%20Main%20Dr%2C%20Fayetteville%2C%20AR&z=15&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="aspect-[4/3] w-full border-0" allowFullScreen />
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Testimonials */}
+      {TESTIMONIALS.length > 0 && (
+        <section className="border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+          <Reveal className="mx-auto max-w-5xl">
+            <div className="text-center">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">Loved by renters</p>
+              <h2 className="mt-1.5 font-serif text-4xl italic font-medium">What they&apos;re saying</h2>
+            </div>
+            <Testimonials items={TESTIMONIALS} />
+            <p className="mt-6 text-center text-[12px] text-ink/40">Sample reviews shown to preview the layout, swap in real customer quotes when you have them.</p>
+          </Reveal>
+        </section>
+      )}
+
+      {/* Instagram */}
+      <section className="border-t border-ink/10 px-6 py-16 sm:py-20">
+        <Reveal className="mx-auto max-w-2xl">
+          <a href="https://instagram.com/borrowfayetteville" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center gap-5 rounded-3xl bg-gradient-to-br from-blush/45 via-lavender/45 to-butter/45 px-6 py-10 text-center sm:flex-row sm:justify-center sm:gap-6 sm:text-left">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-ink text-cream">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
+            <div className="sm:flex-1">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">Follow along</p>
+              <p className="mt-1 font-serif text-2xl italic font-medium sm:text-3xl">@borrowfayetteville</p>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-ink/60">New arrivals, restocks, and pieces styled for every occasion.</p>
+            </div>
+            <span className="inline-block shrink-0 rounded-full bg-ink px-6 py-3 text-[14px] text-cream transition-transform group-hover:scale-[1.03]">Follow on Instagram →</span>
+          </a>
+        </Reveal>
+      </section>
+
+      {/* FAQ (anchor: #faq) */}
+      <section id="faq" className="scroll-mt-20 border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+        <Reveal className="mx-auto max-w-2xl">
+          <h2 className="text-center font-serif text-4xl italic font-medium">Good to know</h2>
+          <div className="mt-8 space-y-2.5">
+            {FAQS.map((f, i) => {
+              const open = openFaq === i;
+              return (
+                <div key={f.q} className="overflow-hidden rounded-2xl border border-ink/10 bg-cream">
+                  <button type="button" onClick={() => setOpenFaq(open ? null : i)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left text-[16px] font-medium">
+                    {f.q}
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" className={`h-4 w-4 shrink-0 text-ink/40 transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
+                      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
+                  <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-4 text-[14px] leading-relaxed text-ink/60">{f.a}</p>
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
-        )}
+        </Reveal>
       </section>
 
-      {/* How it works */}
-      <section className="border-t border-ink/10 bg-white/50 px-6 py-14">
-        <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
-          <div>
-            <p className="font-serif text-3xl italic text-blush-deep">1</p>
-            <h3 className="mt-1 text-xl font-medium">Pick your favorite</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
-              Browse the closet by event or size. Every piece is cleaned and
-              inspected between wears.
-            </p>
-          </div>
-          <div>
-            <p className="font-serif text-3xl italic text-blush-deep">2</p>
-            <h3 className="mt-1 text-xl font-medium">Book your week</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
-              Choose your pickup day — the dress is yours for 7 days. Pay at
-              pickup.
-            </p>
-          </div>
-          <div>
-            <p className="font-serif text-3xl italic text-blush-deep">3</p>
-            <h3 className="mt-1 text-xl font-medium">Wear &amp; return</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
-              Live your night, bring her back by day 7. Late returns run
-              $15/day — don&apos;t do her like that.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <footer className="px-6 py-10 text-center">
-        <p className="font-serif text-2xl italic font-medium">BORROW</p>
-        <p className="mt-1 text-[12px] uppercase tracking-[0.25em] text-ink/40">
-          Rent the dress · Keep the night
-        </p>
-        <a
-          href="/account"
-          className="mt-4 inline-block rounded-full border border-ink/15 px-4 py-2 text-[13px] text-ink/55"
-        >
-          Your account &amp; consignment closet →
-        </a>
-      </footer>
-
-      {open && <BookingSheet item={open} onClose={() => setOpen(null)} />}
+      <SiteFooter />
       <MarketingPopup />
     </main>
   );

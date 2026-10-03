@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-/** Proxies the consignor portal lookup — the API key stays server-side. */
+/** Proxies the consignor portal lookup, the API key stays server-side. */
 export async function POST(request: Request) {
   const base = process.env.ADMIN_API_BASE;
   const key = process.env.BOOKING_API_KEY;
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json(data, { status: res.status });
   } catch {
     return NextResponse.json(
-      { error: "Couldn't reach BORROW — try again" },
+      { error: "Couldn't reach BORROW, try again" },
       { status: 502 }
     );
   }

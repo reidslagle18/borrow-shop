@@ -2,17 +2,34 @@
 
 import { useState } from "react";
 
-/** A pill that opens a checklist popover for multi-selecting filter values. */
+const DEFAULT_SWATCH = "#c9c6c0"; // neutral gray for unmapped color names
+
+/** Resolve a free-text color name to a hex from the map, tolerating case and
+ *  multi-word names ("sage green"), else a neutral placeholder. */
+function swatchHex(name: string, map: Record<string, string>): string {
+  const n = name.trim().toLowerCase();
+  if (map[n]) return map[n];
+  const words = n.split(/\s+/);
+  for (const w of [words[words.length - 1], words[0]]) {
+    if (w && map[w]) return map[w];
+  }
+  return DEFAULT_SWATCH;
+}
+
+/** A pill that opens a checklist popover for multi-selecting filter values.
+ *  Pass `swatches` (color name → hex) to show a color square before each label. */
 export default function MultiSelect({
   label,
   options,
   selected,
   onChange,
+  swatches,
 }: {
   label: string;
   options: string[];
   selected: string[];
   onChange: (next: string[]) => void;
+  swatches?: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
   if (options.length === 0) return null;
@@ -63,6 +80,13 @@ export default function MultiSelect({
                   >
                     ✓
                   </span>
+                  {swatches && (
+                    <span
+                      className="h-4 w-4 shrink-0 rounded-full border border-ink/15"
+                      style={{ backgroundColor: swatchHex(o, swatches) }}
+                      aria-hidden="true"
+                    />
+                  )}
                   {o}
                 </button>
               );

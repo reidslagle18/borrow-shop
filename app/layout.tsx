@@ -15,9 +15,24 @@ const karla = Karla({
 });
 
 export const metadata: Metadata = {
-  title: "BORROW · Rent the dress, keep the night",
+  metadataBase: new URL("https://borrowfayetteville.com"),
+  title: "BORROW · Rent your outfit, save the stress",
   description:
-    "Curated dress rentals for every formal, date party and game day. Pick your dress, book your week, return it when the weekend's over.",
+    "Curated dress rentals for every formal, date party, wedding guest and game day. Pick your dress, book your week, return it when the weekend's over.",
+  openGraph: {
+    title: "BORROW · Rent your outfit, save the stress",
+    description:
+      "A curated closet for formals, date parties, wedding guests, game days, and more, yours for the week.",
+    type: "website",
+    images: ["/store/space.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BORROW · Rent your outfit, save the stress",
+    description:
+      "A curated closet for formals, date parties, wedding guests, game days, and more, yours for the week.",
+    images: ["/store/space.jpg"],
+  },
 };
 
 export const viewport: Viewport = {

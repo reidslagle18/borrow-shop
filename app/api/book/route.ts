@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /**
- * Server-side booking proxy — the BOOKING_API_KEY never reaches the browser.
+ * Server-side booking proxy, the BOOKING_API_KEY never reaches the browser.
  * The studio backend re-validates everything (price, double-booking) anyway.
  */
 export async function POST(request: Request) {
@@ -44,14 +44,14 @@ export async function POST(request: Request) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return NextResponse.json(
-        { error: data.error || "Couldn't book — try again" },
+        { error: data.error || "Couldn't book, try again" },
         { status: res.status === 409 ? 409 : 400 }
       );
     }
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch {
     return NextResponse.json(
-      { error: "Couldn't reach the booking system — try again" },
+      { error: "Couldn't reach the booking system, try again" },
       { status: 502 }
     );
   }

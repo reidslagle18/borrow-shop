@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 const SEEN_KEY = "borrow_marketing_seen";
 
 /**
- * Lightweight marketing opt-in. Shows once per visitor — after ~10s or on exit
- * intent, whichever comes first — and never again after submit/dismiss (stored
+ * Lightweight marketing opt-in. Shows once per visitor, after ~10s or on exit
+ * intent, whichever comes first, and never again after submit/dismiss (stored
  * in localStorage). Saves to the shared customers list via /api/account.
  */
 export default function MarketingPopup() {
@@ -50,7 +50,7 @@ export default function MarketingPopup() {
     try {
       localStorage.setItem(SEEN_KEY, "1");
     } catch {
-      /* private mode — fine */
+      /* private mode, fine */
     }
   }
 
@@ -66,25 +66,30 @@ export default function MarketingPopup() {
     if (!email.trim() || !email.includes("@")) return setError("Please add a valid email.");
     if (hasPhone && !consent) return setError("Please agree to the texting terms to include your number.");
     setBusy(true);
-    const res = await fetch("/api/account", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "marketing",
-        name: name.trim(),
-        email: email.trim(),
-        phone: hasPhone ? phone.trim() : "",
-        sms_consent: hasPhone && consent,
-      }),
-    });
-    if (res.ok) {
-      markSeen();
-      setDone(true);
-    } else {
-      const d = await res.json().catch(() => ({}));
-      setError(d.error || "Couldn't sign you up — try again.");
+    try {
+      const res = await fetch("/api/account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "marketing",
+          name: name.trim(),
+          email: email.trim(),
+          phone: hasPhone ? phone.trim() : "",
+          sms_consent: hasPhone && consent,
+        }),
+      });
+      if (res.ok) {
+        markSeen();
+        setDone(true);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error || "Couldn't sign you up, try again.");
+      }
+    } catch {
+      setError("We couldn't reach BORROW. Check your connection and try again.");
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   if (!open) return null;
@@ -151,7 +156,7 @@ export default function MarketingPopup() {
               <input
                 type="tel"
                 className="w-full rounded-xl border border-ink/15 bg-white px-3.5 py-3 text-[15px] outline-none focus:border-ink/40"
-                placeholder="Phone (optional — for texts)"
+                placeholder="Phone (optional, for texts)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 autoComplete="tel"

@@ -38,14 +38,14 @@ export async function POST(request: Request) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return NextResponse.json(
-        { error: data.error || "Couldn't start checkout — try again" },
+        { error: data.error || "Couldn't start checkout, try again" },
         { status: res.status === 409 ? 409 : 400 }
       );
     }
     return NextResponse.json({ url: data.url });
   } catch {
     return NextResponse.json(
-      { error: "Couldn't reach the payment system — try again" },
+      { error: "Couldn't reach the payment system, try again" },
       { status: 502 }
     );
   }

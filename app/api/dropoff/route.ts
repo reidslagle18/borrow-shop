@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const data = await res.json().catch(() => ({}));
     return NextResponse.json(data, { status: res.status });
   } catch {
-    return NextResponse.json({ error: "Couldn't reach BORROW — try again" }, { status: 502 });
+    return NextResponse.json({ error: "Couldn't reach BORROW, try again" }, { status: 502 });
   }
 }
 
@@ -37,6 +37,6 @@ export async function POST(request: Request) {
     const data = await res.json().catch(() => ({}));
     return NextResponse.json(data, { status: res.status });
   } catch {
-    return NextResponse.json({ error: "Couldn't reach BORROW — try again" }, { status: 502 });
+    return NextResponse.json({ error: "Couldn't reach BORROW, try again" }, { status: 502 });
   }
 }

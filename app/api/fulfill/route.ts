@@ -20,6 +20,6 @@ export async function POST(request: Request) {
     const data = await res.json().catch(() => ({}));
     return NextResponse.json(data, { status: res.status });
   } catch {
-    return NextResponse.json({ error: "Couldn't confirm — try again" }, { status: 502 });
+    return NextResponse.json({ error: "Couldn't confirm, try again" }, { status: 502 });
   }
 }

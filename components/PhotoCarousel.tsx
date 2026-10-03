@@ -3,11 +3,11 @@
 import { useRef, useState } from "react";
 
 /**
- * Photo gallery built on native CSS scroll-snap — iOS/Android do the swiping,
+ * Photo gallery built on native CSS scroll-snap, iOS/Android do the swiping,
  * so it feels seamless (momentum, rubber-band, and correct tap-vs-swipe with no
  * JS gesture math). Dots track the current photo; arrows (desktop) and dot taps
  * scroll to a photo. A plain tap fires onTap (used on grid cards to open the
- * item) — the browser suppresses the click after a swipe, so browsing never
+ * item), the browser suppresses the click after a swipe, so browsing never
  * opens the item by accident.
  */
 export default function PhotoCarousel({
@@ -112,7 +112,7 @@ export default function PhotoCarousel({
             ›
           </button>
 
-          {/* Dots — bigger hit area than they look, for easy tapping */}
+          {/* Dots, bigger hit area than they look, for easy tapping */}
           <div className="absolute inset-x-0 bottom-1 z-10 flex justify-center">
             {photos.map((_, i) => (
               <button

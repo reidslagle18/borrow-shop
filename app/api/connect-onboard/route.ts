@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json(data, { status: res.status });
   } catch {
     return NextResponse.json(
-      { error: "Couldn't reach BORROW — try again" },
+      { error: "Couldn't reach BORROW, try again" },
       { status: 502 }
     );
   }
