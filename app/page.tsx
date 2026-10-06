@@ -30,11 +30,9 @@ const STUDIO_GALLERY: { src: string; alt: string }[] = [
   { src: "/store/gallery/owner-table.jpg", alt: "Browsing the racks at the BORROW studio" },
 ];
 
-const TESTIMONIALS: Testimonial[] = [
-  { name: "Placeholder — Ella R.", detail: "U of A '25", stars: 5, quote: "Found the perfect formal dress in ten minutes and paid a fraction of buying it. Pickup was so easy and it was spotless." },
-  { name: "Placeholder — Maggie T.", detail: "Fayetteville", stars: 5, quote: "I've rented three times now for gamedays and a wedding. Way better than my closet full of dresses I wore once." },
-  { name: "Placeholder — Sydney K.", detail: "U of A '26", stars: 5, quote: "The pieces are actually cute and current, not random. Borrow is my go-to for every date party now." },
-];
+// Real customer reviews only — empty hides the whole "What they're saying"
+// section (no fake placeholders live). Drop real quotes here to bring it back.
+const TESTIMONIALS: Testimonial[] = [];
 
 const FAQS = [
   { q: "How does sizing work?", a: "Every piece lists its size on the tag and its page, and you can filter the closet by your size. Sizes run true to the brand's own sizing, and we note fit quirks in the piece's description when they matter." },
