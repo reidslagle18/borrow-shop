@@ -344,7 +344,7 @@ export default function Home() {
             <div>
               <p className="font-serif text-3xl italic text-blush-deep">2</p>
               <h3 className="mt-1 text-xl font-medium">Book your week</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-ink/55">Choose your pickup day, and the dress is yours for 7 days. Pay at pickup.</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink/55">Pay in full to reserve your piece, then it&rsquo;s yours for 7 days from your pickup day.</p>
             </div>
             <div>
               <p className="font-serif text-3xl italic text-blush-deep">3</p>
