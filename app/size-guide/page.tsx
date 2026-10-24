@@ -49,14 +49,14 @@ export default function SizeGuidePage() {
 
         {/* Size chart */}
         <div className="mt-6 overflow-x-auto rounded-2xl border border-ink/10 bg-white">
-          <table className="w-full min-w-[420px] border-collapse text-left text-[14px]">
+          <table className="w-full border-collapse text-left text-[13px] sm:text-[14px]">
             <thead>
               <tr className="border-b border-ink/10 bg-blush/25 text-ink/70">
-                <th className="px-4 py-3 font-medium">Size</th>
-                <th className="px-4 py-3 font-medium">US</th>
-                <th className="px-4 py-3 font-medium">Bust (in)</th>
-                <th className="px-4 py-3 font-medium">Waist (in)</th>
-                <th className="px-4 py-3 font-medium">Hips (in)</th>
+                <th className="px-2.5 py-3 font-medium sm:px-4">Size</th>
+                <th className="px-2.5 py-3 font-medium sm:px-4">US</th>
+                <th className="px-2.5 py-3 font-medium sm:px-4">Bust</th>
+                <th className="px-2.5 py-3 font-medium sm:px-4">Waist</th>
+                <th className="px-2.5 py-3 font-medium sm:px-4">Hips</th>
               </tr>
             </thead>
             <tbody>
@@ -65,18 +65,19 @@ export default function SizeGuidePage() {
                   key={r.size}
                   className={i % 2 ? "bg-cream/40" : "bg-white"}
                 >
-                  <td className="px-4 py-3 font-serif text-[16px] italic text-blush-deep">
+                  <td className="px-2.5 py-3 font-serif text-[15px] italic text-blush-deep sm:px-4 sm:text-[16px]">
                     {r.size}
                   </td>
-                  <td className="px-4 py-3 text-ink/70">{r.us}</td>
-                  <td className="px-4 py-3 text-ink/70">{r.bust}</td>
-                  <td className="px-4 py-3 text-ink/70">{r.waist}</td>
-                  <td className="px-4 py-3 text-ink/70">{r.hips}</td>
+                  <td className="px-2.5 py-3 text-ink/70 sm:px-4">{r.us}</td>
+                  <td className="px-2.5 py-3 text-ink/70 sm:px-4">{r.bust}</td>
+                  <td className="px-2.5 py-3 text-ink/70 sm:px-4">{r.waist}</td>
+                  <td className="px-2.5 py-3 text-ink/70 sm:px-4">{r.hips}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <p className="mt-1.5 text-[12px] text-ink/40">All measurements in inches.</p>
         <p className="mt-3 text-[13px] text-ink/45">
           Measurements are approximate and vary by brand and cut. When in doubt,
           size up for a relaxed fit or reach out before you book.

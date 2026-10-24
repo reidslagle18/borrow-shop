@@ -229,6 +229,22 @@ function money(n: number | string): string {
   return `$${Number(n)}`;
 }
 
+/** A removable active-filter pill. Shows what's applied; tap the × to clear it. */
+function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-white py-1 pl-3 pr-1 text-[13px] text-ink/75">
+      {label}
+      <button
+        onClick={onRemove}
+        aria-label={`Remove ${label} filter`}
+        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/45 hover:bg-ink/5"
+      >
+        ×
+      </button>
+    </span>
+  );
+}
+
 export default function Shop() {
   const [items, setItems] = useState<PublicItem[] | null>(null);
   const [error, setError] = useState("");
@@ -577,20 +593,14 @@ export default function Shop() {
         </div>
       </section>
 
-      {/* Filters + sort */}
-      <section className="sticky top-0 z-30 mt-3 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur">
+      {/* Filters + sort. Sticks just below the header (offset differs because the
+          header is taller on touch, where icons are 44px tap targets) so the
+          controls never tuck behind the nav on scroll. */}
+      <section className="sticky top-[66px] z-30 mt-3 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur md:top-[56px]">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
           <MultiSelect label="Event" options={eventOptions} selected={fEvents} onChange={setFEvents} />
           <MultiSelect label="Size" options={sizeOptions} selected={fSizes} onChange={setFSizes} />
           <MultiSelect label="Color" options={colorOptions} selected={fColors} onChange={setFColors} swatches={colorSwatches} />
-          {anyFilter ? (
-            <button
-              onClick={shopAll}
-              className="text-sm text-ink/45 underline underline-offset-2"
-            >
-              Clear all
-            </button>
-          ) : null}
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -601,6 +611,49 @@ export default function Shop() {
             <option value="price-desc">Price: high to low</option>
           </select>
         </div>
+
+        {/* Active-filter chips — tap any to remove it, so shoppers can see and
+            undo what's applied without hunting back through each dropdown. */}
+        {anyFilter && (
+          <div className="mx-auto mt-2 flex max-w-5xl flex-wrap items-center gap-1.5">
+            {query.trim() && (
+              <FilterChip label={`“${query.trim()}”`} onRemove={() => setQuery("")} />
+            )}
+            {category && (
+              <FilterChip
+                label={sub ?? category}
+                onRemove={() => {
+                  setCategory(null);
+                  setSub(null);
+                }}
+              />
+            )}
+            {occasion && (
+              <FilterChip
+                label={subOccasion ? `${occasion} · ${subOccasion}` : occasion}
+                onRemove={() => {
+                  setOccasion(null);
+                  setSubOccasion(null);
+                }}
+              />
+            )}
+            {fEvents.map((e) => (
+              <FilterChip key={`e-${e}`} label={e} onRemove={() => setFEvents(fEvents.filter((x) => x !== e))} />
+            ))}
+            {fSizes.map((s) => (
+              <FilterChip key={`s-${s}`} label={`Size ${s}`} onRemove={() => setFSizes(fSizes.filter((x) => x !== s))} />
+            ))}
+            {fColors.map((c) => (
+              <FilterChip key={`c-${c}`} label={c} onRemove={() => setFColors(fColors.filter((x) => x !== c))} />
+            ))}
+            <button
+              onClick={shopAll}
+              className="ml-1 text-[13px] text-ink/45 underline underline-offset-2"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Grid */}

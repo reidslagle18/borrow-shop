@@ -62,6 +62,19 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
     return () => window.removeEventListener("scroll", onScroll);
   }, [transparent]);
 
+  // Lock body scroll + close on Escape while the full-screen mobile drawer is up.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const solid = !transparent || scrolled || menuOpen;
   // Over a photo hero, a stronger shadow keeps the cream text legible on light shots.
   const textCls = solid
@@ -156,69 +169,110 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
           </div>
         </nav>
 
-        {/* Right icons */}
-        <div className={`flex items-center gap-3 ${textCls}`}>
-          <Link href="/shop" aria-label="Search" className="hover:opacity-60">
+        {/* Right icons — each a full 44px tap target on touch devices */}
+        <div className={`flex items-center gap-1 sm:gap-2 ${textCls}`}>
+          <Link
+            href="/shop"
+            aria-label="Search"
+            className="tap-target -mr-0.5 flex items-center justify-center rounded-full hover:opacity-60"
+          >
             <SearchIcon />
           </Link>
-          <Link href="/account" aria-label="Account" className="hover:opacity-60">
+          <Link
+            href="/account"
+            aria-label="Account"
+            className="tap-target flex items-center justify-center rounded-full hover:opacity-60"
+          >
             <AccountIcon />
           </Link>
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Menu"
-            className="md:hidden"
+            aria-label={menuOpen ? "Close menu" : "Menu"}
+            aria-expanded={menuOpen}
+            className="tap-target -mr-1.5 flex items-center justify-center rounded-full md:hidden"
           >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" aria-hidden="true">
               {menuOpen ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — full-screen drawer. Sits just under the sticky header
+          (which keeps the X button on top), locks body scroll, and gives every
+          row a comfortable tap target. */}
       {menuOpen && (
-        <div className="border-t border-ink/10 bg-cream px-5 py-5 text-ink md:hidden">
-          <div className="space-y-3.5">
-            <Link href="/shop" onClick={() => setMenuOpen(false)} className="block text-[17px] font-medium">
-              Shop Rentals
-            </Link>
-            <div className="pl-3">
-              <p className="mb-1 mt-1 text-[11px] uppercase tracking-[0.18em] text-ink/40">
-                Category
-              </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {CATEGORY_LINKS.map((l) => (
-                  <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="text-[14px] text-ink/70">
-                    {l.label}
-                  </Link>
-                ))}
-              </div>
-              <p className="mb-1 mt-2 text-[11px] uppercase tracking-[0.18em] text-ink/40">
-                Occasion
-              </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {OCCASION_LINKS.map((l) => (
-                  <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="text-[14px] text-ink/70">
-                    {l.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <Link href="/dropoff" onClick={() => setMenuOpen(false)} className="block text-[17px] font-medium">
-              Rent Out Your Clothes
-            </Link>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-ink/10 pt-3">
-              {ABOUT_LINKS.map((l) => (
-                <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="text-[13px] text-ink/60">
-                  {l.label}
-                </Link>
-              ))}
-              <Link href="/account" onClick={() => setMenuOpen(false)} className="text-[13px] text-ink/60">
-                My account
+        <div
+          className="fixed inset-0 z-40 bg-cream md:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+        >
+          <div className="h-full overflow-y-auto px-5 pb-safe pt-[72px] text-ink">
+            <nav className="mx-auto max-w-md">
+              <Link
+                href="/shop"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-between border-b border-ink/10 py-3 font-serif text-2xl italic font-medium"
+              >
+                Shop Rentals
+                <span className="text-sm not-italic text-ink/40">View all →</span>
               </Link>
-            </div>
+
+              <p className="mb-2 mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                Shop by Category
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {CATEGORY_LINKS.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center rounded-xl border border-ink/10 bg-white px-4 text-[15px]"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+
+              <p className="mb-2 mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                Shop by Occasion
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {OCCASION_LINKS.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center rounded-xl border border-ink/10 bg-white px-4 text-[15px]"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+
+              <Link
+                href="/dropoff"
+                onClick={() => setMenuOpen(false)}
+                className="mt-6 flex items-center justify-center rounded-full bg-ink px-6 py-4 text-center text-[15px] font-medium text-cream"
+              >
+                Rent Out Your Clothes →
+              </Link>
+
+              <div className="mt-6 border-t border-ink/10 pt-2">
+                {[...ABOUT_LINKS, { label: "My account", href: "/account" }].map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center border-b border-ink/5 py-1 text-[15px] text-ink/70"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
           </div>
         </div>
       )}

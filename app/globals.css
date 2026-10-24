@@ -90,6 +90,17 @@ input, select, textarea, button {
   animation: hero-pan 20s ease-in-out infinite alternate;
 }
 
+/* ---- iPhone safe areas ------------------------------------------------------
+   Honor the notch/home-bar insets so sticky bottom bars and the footer never
+   hide content under the home indicator. Used by the product Reserve bar and
+   the mobile nav drawer. */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
 /* ---- Mobile-first polish ----------------------------------------------------
    Most shoppers are on an iPhone. Keep inputs at 16px so iOS doesn't zoom on
    focus, and give touch controls a comfortable minimum hit area. */
@@ -100,12 +111,19 @@ input, select, textarea, button {
     font-size: 16px;
   }
 
-  /* Comfortable tap targets for pills, dropdowns, links and buttons. */
+  /* Comfortable tap targets for pills, dropdowns, links and buttons. An inline
+     <a> ignores min-height, so also guarantee a real tappable box on the icon
+     links that opt in via .tap-target. */
   button,
   select,
   a[href],
   [role="button"],
   summary {
+    min-height: 44px;
+  }
+
+  .tap-target {
+    min-width: 44px;
     min-height: 44px;
   }
 }

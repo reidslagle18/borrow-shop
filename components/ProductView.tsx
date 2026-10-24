@@ -178,8 +178,13 @@ export default function ProductView({ item }: { item: PublicItem }) {
     setSaving(false);
   }
 
+  // The sticky mobile Reserve bar mirrors the real button's state; tapping it
+  // runs the same book() (which validates and surfaces any error in the form).
+  const reserveDisabled = saving || !!clash || !!closedPickup || !policyOk;
+
   return (
-    <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-2 lg:gap-10">
+    <>
+    <div className="mx-auto grid w-full max-w-5xl gap-6 pb-28 lg:grid-cols-2 lg:gap-10 lg:pb-0">
       {/* Photos, fixed 3:4 frame, sticky beside the details on desktop */}
       <div className="w-full lg:sticky lg:top-6 lg:self-start">
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-lavender/40">
@@ -391,7 +396,7 @@ export default function ProductView({ item }: { item: PublicItem }) {
 
           <button
             onClick={book}
-            disabled={saving || !!clash || !!closedPickup || !policyOk}
+            disabled={reserveDisabled}
             className="w-full rounded-full bg-ink px-6 py-4 text-base text-cream transition-opacity disabled:opacity-40"
           >
             {saving ? "Taking you to checkout…" : `Pay & reserve · ${money(total)}`}
@@ -399,5 +404,27 @@ export default function ProductView({ item }: { item: PublicItem }) {
         </div>
       </div>
     </div>
+
+    {/* Sticky mobile Reserve bar — keeps the price + action in reach without
+        scrolling to the bottom of the form. Hidden on desktop, where the form
+        sits beside the photo. Honors the iPhone home-bar inset. */}
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 px-4 pb-safe pt-3 backdrop-blur lg:hidden">
+      <div className="mx-auto flex max-w-5xl items-center gap-3">
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-[13px] text-ink/55">
+            {start ? `${fmtShort(start)} – ${fmtShort(effectiveDue)}` : "Pick your week"}
+          </p>
+          <p className="text-[15px] font-semibold">{money(total)}</p>
+        </div>
+        <button
+          onClick={book}
+          disabled={reserveDisabled}
+          className="ml-auto shrink-0 rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-cream transition-opacity disabled:opacity-40"
+        >
+          {saving ? "One sec…" : "Pay & reserve"}
+        </button>
+      </div>
+    </div>
+    </>
   );
 }

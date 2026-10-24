@@ -123,6 +123,56 @@ export default function Home() {
 
   const featured = (items ?? []).slice(0, 8);
 
+  // Real inventory, rendered high on the page (right under the hero intro) so a
+  // phone shopper sees actual pieces without scrolling past the category tiles.
+  const featuredSection =
+    featured.length > 0 ? (
+      <section className="mx-auto max-w-6xl px-5 pb-2 pt-6">
+        <div className="mb-5 flex items-end justify-between">
+          <h2 className="font-serif text-3xl italic font-medium">Featured</h2>
+          <Link href="/shop" className="text-[13px] text-ink/50 underline-offset-2 hover:underline">
+            Shop all rentals →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {featured.map((item) => {
+            const cover = item.photos?.[0] || item.photo_url || null;
+            const second = item.photos?.[1] || null;
+            return (
+              <Link key={item.id} href={`/shop/${itemSlug(item)}`} className="group text-left">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
+                  {cover && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={cover}
+                      alt={`${item.brand} dress`}
+                      loading="lazy"
+                      decoding="async"
+                      className={`h-full w-full object-cover transition-opacity duration-500 ${
+                        second ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.03]"
+                      }`}
+                    />
+                  )}
+                  {second && (
+                    // Secondary photo fades in on hover. eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={second}
+                      alt={`${item.brand} — alternate view`}
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    />
+                  )}
+                </div>
+                <p className="mt-2.5 truncate font-serif text-lg font-semibold leading-tight">{item.brand}</p>
+                <p className="mt-0.5 text-[14px] text-ink/55">{money(item.rental_price)}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+    ) : null;
+
   return (
     <main>
       {reserved && (
@@ -203,6 +253,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Featured pieces — real inventory near the top */}
+      {featuredSection}
+
       {/* Shop by Category */}
       <section className="mx-auto max-w-6xl px-5 py-10">
         <div className="mb-5 flex items-end justify-between">
@@ -259,60 +312,6 @@ export default function Home() {
           })}
         </div>
       </section>
-
-      {/* Featured pieces */}
-      {featured.length > 0 && (
-        <section className="mx-auto max-w-6xl px-5 py-10">
-          <div className="mb-5 flex items-end justify-between">
-            <h2 className="font-serif text-3xl italic font-medium">Featured</h2>
-            <Link href="/shop" className="text-[13px] text-ink/50 underline-offset-2 hover:underline">
-              Shop all rentals →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {featured.map((item) => {
-              const cover = item.photos?.[0] || item.photo_url || null;
-              const second = item.photos?.[1] || null;
-              return (
-                <Link key={item.id} href={`/shop/${itemSlug(item)}`} className="group text-left">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
-                    {cover && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={cover}
-                        alt={`${item.brand} dress`}
-                        loading="lazy"
-                        className={`h-full w-full object-cover transition-opacity duration-500 ${
-                          second ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.03]"
-                        }`}
-                      />
-                    )}
-                    {second && (
-                      // Secondary photo fades in on hover. eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={second}
-                        alt={`${item.brand} — alternate view`}
-                        loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                      />
-                    )}
-                  </div>
-                  <p className="mt-2.5 truncate font-serif text-lg font-semibold leading-tight">{item.brand}</p>
-                  <p className="mt-0.5 text-[14px] text-ink/55">{money(item.rental_price)}</p>
-                </Link>
-              );
-            })}
-          </div>
-          <div className="mt-8 text-center">
-            <Link
-              href="/shop"
-              className="inline-block rounded-full bg-ink px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-cream transition-transform hover:scale-[1.03]"
-            >
-              Shop all rentals
-            </Link>
-          </div>
-        </section>
-      )}
 
       {/* Consign / drop-off call-out */}
       <section className="px-5 py-10">

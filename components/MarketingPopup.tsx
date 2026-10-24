@@ -107,7 +107,7 @@ export default function MarketingPopup() {
         <button
           onClick={dismiss}
           aria-label="Close"
-          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-2xl leading-none text-ink/45 hover:bg-ink/5"
+          className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full text-2xl leading-none text-ink/45 hover:bg-ink/5"
         >
           ×
         </button>
