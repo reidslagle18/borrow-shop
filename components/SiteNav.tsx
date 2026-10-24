@@ -85,6 +85,7 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
     "text-[15px] font-medium uppercase tracking-[0.08em] transition-opacity hover:opacity-60";
 
   return (
+    <>
     <header
       className={`sticky top-0 z-50 transition-colors duration-300 ${
         solid ? "border-b border-ink/10 bg-cream/95 backdrop-blur" : "bg-transparent"
@@ -198,10 +199,13 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
           </button>
         </div>
       </div>
+    </header>
 
-      {/* Mobile menu — full-screen drawer. Sits just under the sticky header
-          (which keeps the X button on top), locks body scroll, and gives every
-          row a comfortable tap target. */}
+    {/* Mobile menu — full-screen drawer. Rendered as a sibling of the header
+        (not inside it) because the header's backdrop-blur would otherwise make
+        this fixed overlay position relative to the header instead of the
+        viewport. Covers the screen below the sticky header (which keeps the X on
+        top), locks body scroll, and gives every row a comfortable tap target. */}
       {menuOpen && (
         <div
           className="fixed inset-0 z-40 bg-cream md:hidden"
@@ -276,6 +280,6 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

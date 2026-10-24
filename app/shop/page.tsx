@@ -596,7 +596,7 @@ export default function Shop() {
       {/* Filters + sort. Sticks just below the header (offset differs because the
           header is taller on touch, where icons are 44px tap targets) so the
           controls never tuck behind the nav on scroll. */}
-      <section className="sticky top-[66px] z-30 mt-3 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur md:top-[56px]">
+      <section className="sticky top-[72px] z-30 mt-3 border-y border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur md:top-[56px]">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
           <MultiSelect label="Event" options={eventOptions} selected={fEvents} onChange={setFEvents} />
           <MultiSelect label="Size" options={sizeOptions} selected={fSizes} onChange={setFSizes} />

@@ -15,11 +15,17 @@
   --font-sans: var(--font-karla), system-ui, sans-serif;
 }
 
+html {
+  /* Clip horizontal overflow at the scroll root so a stray wide element never
+     causes sideways scrolling. Keep this on <html> ONLY — setting overflow-x on
+     <body> too makes the body its own scroll container, which silently breaks
+     position: sticky (the sticky header + sticky filter bar stop sticking). */
+  overflow-x: hidden;
+}
+
 html,
 body {
-  /* Never let a stray wide element cause sideways scrolling on mobile. */
   max-width: 100%;
-  overflow-x: hidden;
   /* Gentle anchored scrolling for in-page jumps; never a hard snap. */
   scroll-behavior: smooth;
 }
