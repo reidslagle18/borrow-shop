@@ -106,8 +106,11 @@ export default function HeroMedia({
         })
       )}
 
-      {/* Legibility gradient, then the caption on top. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/25 to-transparent" />
+      {/* Legibility: an all-over tint keeps the centered caption readable even
+          over very bright photos, with a stronger gradient toward the bottom.
+          z-[1] lifts these above the motion-animated (transformed) images. */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-ink/40" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-ink/60 via-transparent to-ink/10" />
       {children}
     </div>
   );

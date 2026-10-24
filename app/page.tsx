@@ -159,16 +159,16 @@ export default function Home() {
       {/* Hero */}
       <section className="relative -mt-[68px]">
         <HeroMedia images={HERO_IMAGES} slides={heroSlides ?? undefined} video={HERO_VIDEO || undefined}>
-          <div className="animate-rise absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-            <h1 className="font-serif text-6xl italic font-medium tracking-tight text-cream drop-shadow-sm sm:text-8xl">
+          <div className="animate-rise absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 py-10 text-center">
+            <h1 className="font-serif text-6xl italic font-medium tracking-tight text-cream [text-shadow:0_1px_3px_rgba(0,0,0,0.85),0_3px_22px_rgba(0,0,0,0.5)] sm:text-8xl">
               BORROW
             </h1>
-            <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-cream/90 sm:text-[18px]">
+            <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-cream [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_2px_12px_rgba(0,0,0,0.5)] sm:text-[18px]">
               Rent your outfit, save the stress.
             </p>
             <Link
               href="/shop"
-              className="mt-7 rounded-full bg-cream/95 px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-ink transition-transform hover:scale-[1.03]"
+              className="mt-7 rounded-full bg-cream px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-ink shadow-lg shadow-ink/25 transition-transform hover:scale-[1.03]"
             >
               Shop Rentals
             </Link>

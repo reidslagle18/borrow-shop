@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         start_date: b.start_date,
         due_date: b.due_date,
         customer: { name, phone, email: (b.email || "").trim() || null },
+        campaign_code: (b.campaign_code || "").toString().trim() || null,
         success_url: `${origin}/?reserved={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/`,
       }),

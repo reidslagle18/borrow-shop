@@ -36,6 +36,12 @@ export default function ProductView({ item }: { item: PublicItem }) {
   const [reservationsOpen, setReservationsOpen] = useState("");
   const [closedDates, setClosedDates] = useState<string[]>([]);
   const [closedWeekdays, setClosedWeekdays] = useState<number[]>([]);
+  const [campaign, setCampaign] = useState<{
+    code: string;
+    organization: string;
+    donation_rate: number;
+  } | null>(null);
+  const [campaignCode, setCampaignCode] = useState("");
 
   // Record the view for the "Most loved" (most-clicked) sort. Fire-and-forget.
   useEffect(() => {
@@ -71,6 +77,7 @@ export default function ProductView({ item }: { item: PublicItem }) {
           setReservationsOpen(String(c.reservations_open));
         if (Array.isArray(c?.closed_dates)) setClosedDates(c.closed_dates.map(String));
         if (Array.isArray(c?.closed_weekdays)) setClosedWeekdays(c.closed_weekdays.map(Number));
+        if (c?.active_campaign?.code) setCampaign(c.active_campaign);
       })
       .catch(() => {});
   }, []);
@@ -156,6 +163,7 @@ export default function ProductView({ item }: { item: PublicItem }) {
           name,
           phone,
           email,
+          campaign_code: campaign ? campaignCode.trim() : "",
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -290,6 +298,27 @@ export default function ProductView({ item }: { item: PublicItem }) {
               />
             </div>
           </div>
+
+          {campaign && (
+            <div className="w-full rounded-xl border-2 border-butter/80 bg-butter/40 px-3.5 py-3 text-left text-[14px] leading-snug">
+              <p className="mb-2">
+                <span className="font-bold">Renting for the Fight?</span> Enter{" "}
+                <span className="font-bold">{campaign.code}</span>.{" "}
+                {campaign.donation_rate}% of rental sales from these dresses goes to{" "}
+                {campaign.organization}.
+              </p>
+              <label className={labelCls}>Campaign code (optional)</label>
+              <input
+                type="text"
+                className={inputCls}
+                value={campaignCode}
+                onChange={(e) => setCampaignCode(e.target.value.toUpperCase())}
+                placeholder={campaign.code}
+                autoCapitalize="characters"
+                autoComplete="off"
+              />
+            </div>
+          )}
 
           <div className="w-full rounded-xl border-2 border-sage/60 bg-sage/25 px-3.5 py-3 text-left text-[14px] leading-snug">
             <span className="font-bold">
