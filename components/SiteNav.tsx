@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useFavorites } from "@/lib/favorites";
 
 /* Shared top navigation for the redesigned storefront. Logo left, links center,
    search + account right (no cart — Borrow reserves one piece at a time). On a
@@ -48,10 +49,18 @@ function AccountIcon() {
     </svg>
   );
 }
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20.5l-1.3-1.2C6 15 3 12.3 3 8.9 3 6.1 5.1 4 7.8 4c1.5 0 3 .7 3.9 1.9l.3.4.3-.4C13.2 4.7 14.7 4 16.2 4 18.9 4 21 6.1 21 8.9c0 3.4-3 6.1-7.7 10.4L12 20.5z" />
+    </svg>
+  );
+}
 
 export default function SiteNav({ transparent = false }: { transparent?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { count: favCount } = useFavorites();
 
   // A transparent (over-hero) nav turns solid once you scroll past the hero.
   useEffect(() => {
@@ -180,6 +189,18 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
             <SearchIcon />
           </Link>
           <Link
+            href="/favorites"
+            aria-label={favCount > 0 ? `Favorites (${favCount} saved)` : "Favorites"}
+            className="tap-target relative flex items-center justify-center rounded-full hover:opacity-60"
+          >
+            <HeartIcon />
+            {favCount > 0 && (
+              <span className="absolute right-0.5 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blush-deep px-1 text-[10px] font-semibold leading-none text-cream">
+                {favCount > 9 ? "9+" : favCount}
+              </span>
+            )}
+          </Link>
+          <Link
             href="/account"
             aria-label="Account"
             className="tap-target flex items-center justify-center rounded-full hover:opacity-60"
@@ -265,7 +286,11 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
               </Link>
 
               <div className="mt-6 border-t border-ink/10 pt-2">
-                {[...ABOUT_LINKS, { label: "My account", href: "/account" }].map((l) => (
+                {[
+                  { label: favCount > 0 ? `My favorites (${favCount})` : "My favorites", href: "/favorites" },
+                  ...ABOUT_LINKS,
+                  { label: "My account", href: "/account" },
+                ].map((l) => (
                   <Link
                     key={l.href}
                     href={l.href}

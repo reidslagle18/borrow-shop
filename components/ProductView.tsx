@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import PhotoCarousel from "@/components/PhotoCarousel";
+import HeartButton from "@/components/HeartButton";
 import { PublicItem, addDays, fmtShort, findClash, todayISO } from "@/lib/types";
 
 const inputCls =
@@ -194,9 +195,12 @@ export default function ProductView({ item }: { item: PublicItem }) {
 
       {/* Details + booking */}
       <div className="w-full min-w-0">
-        <h1 className="font-serif text-3xl font-semibold leading-tight sm:text-4xl">
-          {item.brand}
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="font-serif text-3xl font-semibold leading-tight sm:text-4xl">
+            {item.brand}
+          </h1>
+          <HeartButton itemId={item.id} variant="inline" className="mt-0.5 shrink-0" />
+        </div>
         <p className="mt-1.5 text-sm text-ink/55">
           Size {item.size}
           {item.color ? ` · ${item.color}` : ""} ·{" "}

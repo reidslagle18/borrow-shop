@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import MultiSelect from "@/components/MultiSelect";
 import MarketingPopup from "@/components/MarketingPopup";
+import HeartButton from "@/components/HeartButton";
 import PhotoCarousel from "@/components/PhotoCarousel";
 import Reveal from "@/components/Reveal";
 import SiteFooter from "@/components/SiteFooter";
@@ -716,7 +717,7 @@ export default function Shop() {
               return (
                 <div
                   key={item.id}
-                  className="animate-rise group text-left"
+                  className="animate-rise group relative text-left"
                   style={{ animationDelay: `${Math.min(idx, 8) * 35}ms` }}
                 >
                   {/* Fixed 3:4 frame, stays put as photos change; swipe/arrows
@@ -734,6 +735,8 @@ export default function Shop() {
                         </span>
                       }
                     />
+                    {/* Save to favorites — sits above the carousel's tap layer */}
+                    <HeartButton itemId={item.id} className="absolute right-2 top-2 z-20" />
                   </div>
                   <Link
                     href={href}

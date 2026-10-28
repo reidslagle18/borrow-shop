@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import MarketingPopup from "@/components/MarketingPopup";
+import HeartButton from "@/components/HeartButton";
 import Reveal from "@/components/Reveal";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
@@ -139,34 +140,38 @@ export default function Home() {
             const cover = item.photos?.[0] || item.photo_url || null;
             const second = item.photos?.[1] || null;
             return (
-              <Link key={item.id} href={`/shop/${itemSlug(item)}`} className="group text-left">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
-                  {cover && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={cover}
-                      alt={`${item.brand} dress`}
-                      loading="lazy"
-                      decoding="async"
-                      className={`h-full w-full object-cover transition-opacity duration-500 ${
-                        second ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.03]"
-                      }`}
-                    />
-                  )}
-                  {second && (
-                    // Secondary photo fades in on hover. eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={second}
-                      alt={`${item.brand} — alternate view`}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                    />
-                  )}
-                </div>
-                <p className="mt-2.5 truncate font-serif text-lg font-semibold leading-tight">{item.brand}</p>
-                <p className="mt-0.5 text-[14px] text-ink/55">{money(item.rental_price)}</p>
-              </Link>
+              <div key={item.id} className="group relative text-left">
+                <Link href={`/shop/${itemSlug(item)}`} className="block">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
+                    {cover && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={cover}
+                        alt={`${item.brand} dress`}
+                        loading="lazy"
+                        decoding="async"
+                        className={`h-full w-full object-cover transition-opacity duration-500 ${
+                          second ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.03]"
+                        }`}
+                      />
+                    )}
+                    {second && (
+                      // Secondary photo fades in on hover. eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={second}
+                        alt={`${item.brand} — alternate view`}
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                      />
+                    )}
+                  </div>
+                  <p className="mt-2.5 truncate font-serif text-lg font-semibold leading-tight">{item.brand}</p>
+                  <p className="mt-0.5 text-[14px] text-ink/55">{money(item.rental_price)}</p>
+                </Link>
+                {/* Save to favorites */}
+                <HeartButton itemId={item.id} className="absolute right-2 top-2 z-20" />
+              </div>
             );
           })}
         </div>
