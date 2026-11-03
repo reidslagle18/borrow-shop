@@ -14,7 +14,6 @@ const CATEGORY_LINKS = [
   { label: "Sets", href: "/shop?category=Sets" },
   { label: "Tops", href: "/shop?category=Tops" },
   { label: "Skirts", href: "/shop?category=Skirts" },
-  { label: "Pants", href: "/shop?category=Pants" },
 ];
 const OCCASION_LINKS = [
   { label: "Vacation", href: "/shop?occasion=Vacation" },

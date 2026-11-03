@@ -160,7 +160,6 @@ const CATEGORIES: Category[] = [
   },
   { label: "Tops", sils: ["Top"] },
   { label: "Skirts", sils: ["Skirt"] },
-  { label: "Pants", sils: ["Pants"] },
   { label: "Shorts", sils: ["Shorts"] },
   { label: "Jumpsuits", sils: ["Jumpsuit"] },
   { label: "Sets", sils: ["Matching Set", "Co-ord"] },

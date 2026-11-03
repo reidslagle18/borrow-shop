@@ -49,7 +49,6 @@ const CATEGORY_TILES: { label: string; cls: string }[] = [
   { label: "Sets", cls: "bg-sage/45" },
   { label: "Tops", cls: "bg-lavender/60" },
   { label: "Skirts", cls: "bg-butter/70" },
-  { label: "Pants", cls: "bg-blush/35" },
 ];
 const OCCASION_TILES: { label: string; cls: string }[] = [
   { label: "Vacation", cls: "bg-sage/45" },
