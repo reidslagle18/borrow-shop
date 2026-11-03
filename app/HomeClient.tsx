@@ -10,6 +10,7 @@ import SiteNav from "@/components/SiteNav";
 import HeroMedia, { type HeroSlide } from "@/components/HeroMedia";
 import TrustBadges from "@/components/TrustBadges";
 import Testimonials, { type Testimonial } from "@/components/Testimonials";
+import Bow from "@/components/Bow";
 import { PublicItem, itemSlug } from "@/lib/types";
 
 /* ---------------------------------------------------------------------------
@@ -134,8 +135,15 @@ export default function HomeClient({
     featured.length > 0 ? (
       <section className="mx-auto max-w-6xl px-5 pb-2 pt-6">
         <div className="mb-5 flex items-end justify-between">
-          <h2 className="font-serif text-3xl italic font-medium">Featured</h2>
-          <Link href="/shop" className="text-[13px] text-ink/50 underline-offset-2 hover:underline">
+          <div>
+            <p className="kicker flex items-center gap-2">
+              <Bow className="h-3 w-5 text-blush-deep" /> Our picks
+            </p>
+            <h2 className="mt-1.5 font-serif text-4xl italic leading-none sm:text-5xl">
+              Featured
+            </h2>
+          </div>
+          <Link href="/shop" className="shrink-0 text-[13px] text-ink/55 link-underline hover:text-ink">
             Shop all rentals →
           </Link>
         </div>
@@ -214,18 +222,21 @@ export default function HomeClient({
       {/* Hero */}
       <section className="relative -mt-[68px]">
         <HeroMedia images={HERO_IMAGES} slides={heroSlides ?? undefined} video={HERO_VIDEO || undefined}>
-          <div className="animate-rise absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 py-10 text-center">
-            <h1 className="font-serif text-6xl italic font-medium tracking-tight text-cream [text-shadow:0_1px_3px_rgba(0,0,0,0.85),0_3px_22px_rgba(0,0,0,0.5)] sm:text-8xl">
+          <div className="animate-rise absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 py-10 text-center text-cream">
+            <span className="script text-3xl leading-none [text-shadow:0_1px_10px_rgba(0,0,0,0.6)] sm:text-4xl">
+              welcome to the closet
+            </span>
+            <h1 className="mt-1 font-serif text-7xl leading-[0.9] tracking-tight [text-shadow:0_1px_3px_rgba(0,0,0,0.85),0_3px_22px_rgba(0,0,0,0.5)] sm:text-[8.5rem]">
               BORROW
             </h1>
-            <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-cream [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_2px_12px_rgba(0,0,0,0.5)] sm:text-[18px]">
+            <p className="mx-auto mt-4 max-w-md text-[16px] leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_2px_12px_rgba(0,0,0,0.5)] sm:text-[18px]">
               Rent your outfit, save the stress.
             </p>
             <Link
               href="/shop"
-              className="mt-7 rounded-full bg-cream px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-ink shadow-lg shadow-ink/25 transition-transform hover:scale-[1.03]"
+              className="mt-8 rounded-full bg-blush px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-ink shadow-lg shadow-ink/30 transition-transform hover:scale-[1.03]"
             >
-              Shop Rentals
+              Shop the closet
             </Link>
           </div>
         </HeroMedia>
@@ -242,6 +253,24 @@ export default function HomeClient({
             maskSize: "20px 20px",
           }}
         />
+      </section>
+
+      {/* Signature brand ticker — a little moving detail, girly but restrained */}
+      <section aria-hidden="true" className="overflow-hidden border-b border-blush/30 bg-petal py-3">
+        <div className="flex w-max animate-marquee items-center whitespace-nowrap">
+          {Array.from({ length: 2 }).map((_, r) => (
+            <div key={r} className="flex items-center">
+              {["Formals", "Date parties", "Game days", "Weddings", "Graduation", "Vacation"].map(
+                (w, i) => (
+                  <span key={`${r}-${i}`} className="flex items-center gap-5 px-5 text-ink/70">
+                    <span className="font-serif text-xl italic">{w}</span>
+                    <Bow className="h-3.5 w-5 text-blush-deep" />
+                  </span>
+                )
+              )}
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Intro line */}
@@ -321,9 +350,9 @@ export default function HomeClient({
       {/* Consign / drop-off call-out */}
       <section className="px-5 py-10">
         <Reveal className="mx-auto max-w-5xl">
-          <div className="flex flex-col items-center gap-5 rounded-3xl bg-blush/45 px-6 py-8 text-center sm:flex-row sm:justify-between sm:gap-8 sm:px-10 sm:text-left">
+          <div className="flex flex-col items-center gap-5 rounded-3xl bg-sage/35 px-6 py-8 text-center sm:flex-row sm:justify-between sm:gap-8 sm:px-10 sm:text-left">
             <div>
-              <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">Consign with Borrow</p>
+              <p className="kicker text-sage-deep">Consign with Borrow</p>
               <h2 className="mt-1.5 font-serif text-2xl italic font-medium sm:text-3xl">Have pieces to drop off?</h2>
               <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-ink/65">
                 Bring in the dresses you&apos;re done with, and you earn 20% every time one rents. Book a quick appointment and we&apos;ll handle the rest.
@@ -337,7 +366,7 @@ export default function HomeClient({
       </section>
 
       {/* How it works */}
-      <section className="border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+      <section className="border-t border-blush/20 bg-petal px-6 py-16 sm:py-20">
         <Reveal>
           <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
             <div>
@@ -360,7 +389,7 @@ export default function HomeClient({
       </section>
 
       {/* Trust / reassurance row */}
-      <section className="border-t border-ink/10 bg-white/50 px-6 py-10 sm:py-12">
+      <section className="border-t border-ink/10 bg-cloud px-6 py-10 sm:py-12">
         <Reveal>
           <TrustBadges />
         </Reveal>
@@ -368,7 +397,7 @@ export default function HomeClient({
 
       {/* Studio gallery */}
       {STUDIO_GALLERY.length > 0 && (
-        <section className="border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+        <section className="border-t border-lavender/50 bg-mist px-6 py-16 sm:py-20">
           <Reveal className="mx-auto max-w-6xl">
             <div className="text-center">
               <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">A look inside</p>
@@ -386,7 +415,7 @@ export default function HomeClient({
       )}
 
       {/* Find us / Store Hours & Location (anchor: #visit) */}
-      <section id="visit" className="scroll-mt-20 border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+      <section id="visit" className="scroll-mt-20 border-t border-blush/20 bg-petal px-6 py-16 sm:py-20">
         <Reveal className="mx-auto max-w-5xl">
           <div className="grid items-center gap-8 sm:grid-cols-2 lg:gap-12">
             <div className="order-2 text-center sm:order-1 sm:text-left">
@@ -413,7 +442,7 @@ export default function HomeClient({
 
       {/* Testimonials */}
       {TESTIMONIALS.length > 0 && (
-        <section className="border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+        <section className="border-t border-ink/10 bg-cloud px-6 py-16 sm:py-20">
           <Reveal className="mx-auto max-w-5xl">
             <div className="text-center">
               <p className="text-[12px] uppercase tracking-[0.2em] text-blush-deep">Loved by renters</p>
@@ -428,7 +457,7 @@ export default function HomeClient({
       {/* Instagram */}
       <section className="border-t border-ink/10 px-6 py-16 sm:py-20">
         <Reveal className="mx-auto max-w-2xl">
-          <a href="https://instagram.com/borrowfayetteville" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center gap-5 rounded-3xl bg-gradient-to-br from-blush/45 via-lavender/45 to-butter/45 px-6 py-10 text-center sm:flex-row sm:justify-center sm:gap-6 sm:text-left">
+          <a href="https://instagram.com/borrowfayetteville" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center gap-5 rounded-3xl bg-butter/55 px-6 py-10 text-center sm:flex-row sm:justify-center sm:gap-6 sm:text-left">
             <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-ink text-cream">
               <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -447,7 +476,7 @@ export default function HomeClient({
       </section>
 
       {/* FAQ (anchor: #faq) */}
-      <section id="faq" className="scroll-mt-20 border-t border-ink/10 bg-white/50 px-6 py-16 sm:py-20">
+      <section id="faq" className="scroll-mt-20 border-t border-lavender/50 bg-mist px-6 py-16 sm:py-20">
         <Reveal className="mx-auto max-w-2xl">
           <h2 className="text-center font-serif text-4xl italic font-medium">Good to know</h2>
           <div className="mt-8 space-y-2.5">

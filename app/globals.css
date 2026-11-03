@@ -1,32 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #f7f4ef;
+  /* Base is now clean white. "cream" keeps its name so every existing class
+     (bg-cream/text-cream) picks up the new base with no rewrites. */
+  --color-cream: #ffffff;
   --color-ink: #1a1a1a;
-  --color-butter: #fff8ba;
-  --color-blush: #d1b2b8;
-  --color-sage: #a8b677;
-  --color-lavender: #dfe0f3;
+
+  /* Brand accents — used with intention, one signature tone per section type. */
+  --color-blush: #d1b2b8; /* dusty pink — the signature accent */
+  --color-butter: #fff8ba; /* soft yellow — playful / CTA moments */
+  --color-sage: #a8b677; /* sage — the "rent out / consignor" story */
+  --color-lavender: #dfe0f3; /* lavender — calm account / portal */
 
   --color-blush-deep: #b08d95;
   --color-sage-deep: #7d8c50;
 
-  --font-serif: var(--font-cormorant), Georgia, serif;
-  --font-sans: var(--font-karla), system-ui, sans-serif;
+  /* Barely-there tints for soft section fields on the white base. */
+  --color-petal: #faf3f4; /* whisper of pink */
+  --color-mist: #f5f6fc; /* whisper of lavender */
+  --color-cloud: #fbfaf7; /* warm near-white for alternating bands */
+
+  /* Distinctive type — an airy editorial serif, a warm grotesk, and a refined
+     script for tiny signature moments. Deliberately NOT the template defaults. */
+  --font-serif: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --font-script: var(--font-pinyon), cursive;
 }
 
 html {
-  /* Clip horizontal overflow at the scroll root so a stray wide element never
-     causes sideways scrolling. Keep this on <html> ONLY — setting overflow-x on
-     <body> too makes the body its own scroll container, which silently breaks
-     position: sticky (the sticky header + sticky filter bar stop sticking). */
   overflow-x: hidden;
 }
 
 html,
 body {
   max-width: 100%;
-  /* Gentle anchored scrolling for in-page jumps; never a hard snap. */
   scroll-behavior: smooth;
 }
 
@@ -35,122 +42,104 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
   font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+
+/* The script accent — only for small "signature" moments (kickers, a wink). */
+.script {
+  font-family: var(--font-script);
+  font-weight: 400;
+}
+
+/* Eyebrow kicker above section titles — spaced, quiet, confident. */
+.kicker {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-blush-deep);
 }
 
 ::selection {
-  background: var(--color-butter);
+  background: var(--color-blush);
+  color: #fff;
 }
 
 input, select, textarea, button {
   font-family: inherit;
 }
 
-/* ---- Entrance animation ----------------------------------------------------
-   A soft rise + fade, used to ease content in rather than pop. Kept subtle
-   (small travel, quick ease-out) so the boutique feels calm, not flashy. */
+/* Signature link underline that grows on hover (used on text links). */
+.link-underline {
+  background-image: linear-gradient(var(--color-blush), var(--color-blush));
+  background-size: 0% 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease;
+}
+.link-underline:hover {
+  background-size: 100% 1.5px;
+}
+
+/* ---- Entrance animation ---- */
 @keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+.animate-rise { animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-.animate-rise {
-  animation: rise 0.35s ease-out both;
-}
-
-/* Brief cross-fade for filter/search result swaps, no layout shift. */
 @keyframes soft-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
+.animate-fade { animation: soft-fade 0.3s ease-out both; }
 
-.animate-fade {
-  animation: soft-fade 0.28s ease-out both;
-}
-
-/* Slow, subtle Ken-Burns pan on the hero backdrop for a bit of life. Paired
-   with the crossfade carousel; disabled for reduced-motion below. */
+/* Slow hero pan (disabled for reduced-motion). */
 @keyframes hero-pan {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.08);
-  }
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
 }
+.hero-pan { animation: hero-pan 22s ease-in-out infinite alternate; }
 
-.hero-pan {
-  animation: hero-pan 20s ease-in-out infinite alternate;
+/* A tiny, slow sway for the signature doodles — playful but calm. */
+@keyframes sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
 }
+.animate-sway { animation: sway 6s ease-in-out infinite; transform-origin: center; }
 
-/* ---- iPhone safe areas ------------------------------------------------------
-   Honor the notch/home-bar insets so sticky bottom bars and the footer never
-   hide content under the home indicator. Used by the product Reserve bar and
-   the mobile nav drawer. */
-.pb-safe {
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+/* Marquee for the little "brand ticker" strip. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
-.pt-safe {
-  padding-top: max(0.75rem, env(safe-area-inset-top));
-}
+.animate-marquee { animation: marquee 28s linear infinite; }
 
-/* ---- Mobile-first polish ----------------------------------------------------
-   Most shoppers are on an iPhone. Keep inputs at 16px so iOS doesn't zoom on
-   focus, and give touch controls a comfortable minimum hit area. */
+/* ---- iPhone safe areas ---- */
+.pb-safe { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+.pt-safe { padding-top: max(0.75rem, env(safe-area-inset-top)); }
+
+/* ---- Mobile-first polish ---- */
 @media (pointer: coarse) {
-  input,
-  select,
-  textarea {
-    font-size: 16px;
-  }
-
-  /* Comfortable tap targets for pills, dropdowns, links and buttons. An inline
-     <a> ignores min-height, so also guarantee a real tappable box on the icon
-     links that opt in via .tap-target. */
-  button,
-  select,
-  a[href],
-  [role="button"],
-  summary {
-    min-height: 44px;
-  }
-
-  .tap-target {
-    min-width: 44px;
-    min-height: 44px;
-  }
+  input, select, textarea { font-size: 16px; }
+  button, select, a[href], [role="button"], summary { min-height: 44px; }
+  .tap-target { min-width: 44px; min-height: 44px; }
 }
 
-/* ---- Respect reduced-motion -------------------------------------------------
-   Disable entrance/scroll motion for shoppers who ask for less movement. */
+/* ---- Respect reduced-motion ---- */
 @media (prefers-reduced-motion: reduce) {
-  html,
-  body {
-    scroll-behavior: auto;
-  }
-
-  .animate-rise,
-  .animate-fade,
-  .hero-pan {
+  html, body { scroll-behavior: auto; }
+  .animate-rise, .animate-fade, .hero-pan, .animate-sway, .animate-marquee {
     animation: none;
   }
-
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto;
-  }
+  *, *::before, *::after { scroll-behavior: auto; }
 }

@@ -1,17 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Karla } from "next/font/google";
+import { Instrument_Serif, Hanken_Grotesk, Pinyon_Script } from "next/font/google";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+// Display: an airy, high-contrast editorial serif (distinctive, not a template
+// default). Body: a warm, friendly grotesk. Accent: a refined script used only
+// for tiny signature moments.
+const instrument = Instrument_Serif({
+  variable: "--font-instrument",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400"],
   style: ["normal", "italic"],
 });
 
-const karla = Karla({
-  variable: "--font-karla",
+const hanken = Hanken_Grotesk({
+  variable: "--font-hanken",
   subsets: ["latin"],
+});
+
+const pinyon = Pinyon_Script({
+  variable: "--font-pinyon",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${karla.variable} h-full antialiased`}
+      className={`${instrument.variable} ${hanken.variable} ${pinyon.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>
     </html>
