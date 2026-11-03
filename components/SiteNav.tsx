@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Bow from "@/components/Bow";
 
 /* Shared top navigation for the redesigned storefront. Logo left, links center,
    search + account right (no cart — Borrow reserves one piece at a time). On a
@@ -99,14 +98,13 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
         />
       )}
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
-        {/* Logo — wordmark with the signature bow mark */}
+        {/* Logo */}
         <Link
           href="/"
           aria-label="Borrow — home"
-          className={`group/logo flex items-center gap-2 leading-none ${textCls}`}
+          className={`flex items-center leading-none ${textCls}`}
         >
-          <Bow className="h-4 w-6 shrink-0 text-blush transition-transform duration-300 group-hover/logo:-rotate-6" />
-          <span className="font-serif text-[1.7rem] leading-none tracking-[0.02em]">
+          <span className="font-serif text-[1.7rem] italic leading-none tracking-[0.02em]">
             BORROW
           </span>
         </Link>

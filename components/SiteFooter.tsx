@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Bow from "@/components/Bow";
 
 /**
  * Shared site footer: an editorial, branded footer on a soft pink field. Brand
@@ -42,12 +41,9 @@ export default function SiteFooter({ showBrand = true }: { showBrand?: boolean }
           <div>
             {showBrand && (
               <>
-                <div className="flex items-center gap-2.5">
-                  <Bow className="h-5 w-7 text-blush-deep" />
-                  <span className="font-serif text-3xl leading-none tracking-[0.02em]">
-                    BORROW
-                  </span>
-                </div>
+                <span className="font-serif text-3xl italic leading-none tracking-[0.02em]">
+                  BORROW
+                </span>
                 <p className="script mt-3 text-2xl text-blush-deep">
                   rent your outfit, save the stress
                 </p>

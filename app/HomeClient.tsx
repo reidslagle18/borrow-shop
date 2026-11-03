@@ -10,7 +10,6 @@ import SiteNav from "@/components/SiteNav";
 import HeroMedia, { type HeroSlide } from "@/components/HeroMedia";
 import TrustBadges from "@/components/TrustBadges";
 import Testimonials, { type Testimonial } from "@/components/Testimonials";
-import Bow from "@/components/Bow";
 import { PublicItem, itemSlug } from "@/lib/types";
 
 /* ---------------------------------------------------------------------------
@@ -136,9 +135,7 @@ export default function HomeClient({
       <section className="mx-auto max-w-6xl px-5 pb-2 pt-6">
         <div className="mb-5 flex items-end justify-between">
           <div>
-            <p className="kicker flex items-center gap-2">
-              <Bow className="h-3 w-5 text-blush-deep" /> Our picks
-            </p>
+            <p className="kicker">Our picks</p>
             <h2 className="mt-1.5 font-serif text-4xl italic leading-none sm:text-5xl">
               Featured
             </h2>
@@ -264,7 +261,7 @@ export default function HomeClient({
                 (w, i) => (
                   <span key={`${r}-${i}`} className="flex items-center gap-5 px-5 text-ink/70">
                     <span className="font-serif text-xl italic">{w}</span>
-                    <Bow className="h-3.5 w-5 text-blush-deep" />
+                    <span className="text-blush-deep">·</span>
                   </span>
                 )
               )}

@@ -20,11 +20,8 @@
   --color-mist: #f5f6fc; /* whisper of lavender */
   --color-cloud: #fbfaf7; /* warm near-white for alternating bands */
 
-  /* Distinctive type — an airy editorial serif, a warm grotesk, and a refined
-     script for tiny signature moments. Deliberately NOT the template defaults. */
-  --font-serif: var(--font-instrument), "Times New Roman", serif;
-  --font-sans: var(--font-hanken), system-ui, sans-serif;
-  --font-script: var(--font-pinyon), cursive;
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-karla), system-ui, sans-serif;
 }
 
 html {
@@ -48,15 +45,13 @@ body {
 
 h1, h2, h3 {
   font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
 }
 
-/* The script accent — only for small "signature" moments (kickers, a wink). */
+/* Small "signature" accent — italic serif (no separate script font). */
 .script {
-  font-family: var(--font-script);
-  font-weight: 400;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
 }
 
 /* Eyebrow kicker above section titles — spaced, quiet, confident. */
