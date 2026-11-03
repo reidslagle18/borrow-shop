@@ -348,14 +348,22 @@ export default function Shop() {
     return Array.from(set).sort();
   }, [items]);
 
-  // Only show category pills that actually have matching inventory.
-  const visibleCategories = useMemo(() => {
-    const present = new Set<string>();
-    (items ?? []).forEach((i) => itemSilhouettes(i).forEach((s) => present.add(s)));
-    return CATEGORIES.filter((c) => c.sils.some((s) => present.has(s)));
-  }, [items]);
-
+  // The category pill row was removed from the UI, but the ?category= deep link
+  // (nav dropdown + homepage tiles) still filters via activeCat below.
   const activeCat = CATEGORIES.find((c) => c.label === category) ?? null;
+
+  // Featured showcase (owner-curated in the studio). Drawn from the full feed —
+  // which already contains only normally-listed pieces — so unlisted/retired/
+  // pending/hold pieces are skipped automatically without touching their flag.
+  // Independent of the active filters; shown in the owner's saved order.
+  const featuredList = useMemo(() => {
+    const f = (items ?? []).filter((i) => i.featured);
+    return f.sort((a, b) => {
+      const ra = a.featured_rank ?? Number.MAX_SAFE_INTEGER;
+      const rb = b.featured_rank ?? Number.MAX_SAFE_INTEGER;
+      return ra - rb;
+    });
+  }, [items]);
 
   const eventOptions = useMemo(() => {
     const present = new Set<string>();
@@ -479,6 +487,50 @@ export default function Shop() {
         </p>
       </section>
 
+      {/* Featured — owner-curated showcase, above the main grid. Hidden when
+          nothing is featured. Large cover photos: 2 across on mobile, 4 on
+          desktop. Each links to the piece like a grid card. */}
+      {featuredList.length > 0 && (
+        <section className="mx-auto w-full max-w-5xl px-5 pt-5">
+          <h2 className="font-serif text-2xl italic font-medium">Featured</h2>
+          <div className="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {featuredList.map((item) => {
+              const cover = item.photos?.[0] || item.photo_url || null;
+              const href = `/shop/${itemSlug(item)}`;
+              return (
+                <Link key={item.id} href={href} className="group text-left">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/40">
+                    {cover ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={cover}
+                        alt={`${item.brand} dress`}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center font-serif text-5xl italic text-ink/20">
+                        {item.brand.charAt(0)}
+                      </div>
+                    )}
+                    <span className="pointer-events-none absolute bottom-2.5 right-2.5 rounded-full bg-cream/95 px-3 py-1 text-[13px] font-medium">
+                      {money(item.rental_price)}
+                    </span>
+                  </div>
+                  <p className="mt-2 truncate px-1 font-serif text-lg font-semibold leading-tight">
+                    {item.brand}
+                  </p>
+                  <p className="px-1 text-[13px] text-ink/50">
+                    Size {item.size}
+                    {item.color ? ` · ${item.color}` : ""}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Search + Shop by categories */}
       <section id="closet" className="mx-auto w-full max-w-5xl px-5 scroll-mt-4">
         <div className="relative">
@@ -500,42 +552,10 @@ export default function Shop() {
             </button>
           )}
         </div>
-        <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
-          <span className="shrink-0 text-[12px] uppercase tracking-[0.18em] text-ink/45">
-            Shop by:
-          </span>
-          <button onClick={shopAll} className={pillCls(!category)}>
-            Shop All
-          </button>
-          {visibleCategories.map((c) => (
-            <button
-              key={c.label}
-              onClick={() => {
-                setCategory(c.label);
-                setSub(null);
-              }}
-              className={pillCls(category === c.label)}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-        {activeCat?.subs && (
-          <div className="mt-2 flex items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
-            <button onClick={() => setSub(null)} className={subPillCls(!sub)}>
-              All {activeCat.label}
-            </button>
-            {activeCat.subs.map((s) => (
-              <button
-                key={s.sil}
-                onClick={() => setSub(s.sil)}
-                className={subPillCls(sub === s.sil)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* "Shop by Category" pill row + its sub-filter row were removed from the
+            interface. The category filter LOGIC and the ?category= deep link are
+            kept so the nav dropdown + homepage tiles still work and show a
+            removable chip below; no category/silhouette data was deleted. */}
         {occasions.length > 0 && (
           <div className="mt-3 border-t border-ink/10 pt-3">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">

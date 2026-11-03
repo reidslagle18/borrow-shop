@@ -64,7 +64,7 @@ export default function HeroMedia({
   }, [useVideo, reduce, slides.length, intervalMs]);
 
   return (
-    <div className="group relative mt-4 h-[56dvh] min-h-[360px] max-h-[600px] w-full overflow-hidden">
+    <div className="group relative mt-4 h-[56dvh] min-h-[360px] max-h-[600px] w-full overflow-hidden bg-ink">
       {useVideo ? (
         <video
           className="absolute inset-0 h-full w-full object-cover object-center"

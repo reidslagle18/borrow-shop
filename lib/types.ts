@@ -22,6 +22,8 @@ export interface PublicItem {
   status: string;
   set_group?: string | null;
   booked: BookedRange[];
+  featured?: boolean; // owner-starred — shown in the shop's Featured section
+  featured_rank?: number | null; // manual order within Featured (lower = earlier)
 }
 
 export const EVENT_TYPES = [
