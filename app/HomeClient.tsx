@@ -219,22 +219,11 @@ export default function HomeClient({
       {/* Hero */}
       <section className="relative -mt-[68px]">
         <HeroMedia images={HERO_IMAGES} slides={heroSlides ?? undefined} video={HERO_VIDEO || undefined}>
-          <div className="animate-rise absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 py-10 text-center text-cream">
-            <span className="script text-3xl leading-none [text-shadow:0_1px_10px_rgba(0,0,0,0.6)] sm:text-4xl">
-              welcome to the closet
-            </span>
-            <h1 className="mt-1 font-serif text-7xl leading-[0.9] tracking-tight [text-shadow:0_1px_3px_rgba(0,0,0,0.85),0_3px_22px_rgba(0,0,0,0.5)] sm:text-[8.5rem]">
+          {/* Wordmark set into the bottom-right of the hero photo (editorial). */}
+          <div className="animate-rise absolute inset-0 z-[2] flex items-end justify-end px-6 pb-9 sm:px-12 sm:pb-12">
+            <h1 className="font-serif text-6xl leading-[0.85] tracking-tight text-cream [text-shadow:0_1px_4px_rgba(0,0,0,0.55),0_4px_26px_rgba(0,0,0,0.4)] sm:text-8xl md:text-[8.5rem]">
               BORROW
             </h1>
-            <p className="mx-auto mt-4 max-w-md text-[16px] leading-relaxed [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_2px_12px_rgba(0,0,0,0.5)] sm:text-[18px]">
-              Rent your outfit, save the stress.
-            </p>
-            <Link
-              href="/shop"
-              className="mt-8 rounded-full bg-blush px-9 py-3.5 text-[13px] font-medium uppercase tracking-[0.18em] text-ink shadow-lg shadow-ink/30 transition-transform hover:scale-[1.03]"
-            >
-              Shop the closet
-            </Link>
           </div>
         </HeroMedia>
         {/* Scalloped bottom edge */}

@@ -98,20 +98,21 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
         />
       )}
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
-        {/* Logo */}
-        <Link
-          href="/"
-          aria-label="Borrow — home"
-          className={`flex items-center leading-none ${textCls}`}
-        >
-          <span className="font-serif text-[1.7rem] italic leading-none tracking-[0.02em]">
-            BORROW
-          </span>
-        </Link>
-
-        {/* Center links (desktop) — order intentionally differs from the
-            reference site; the logo doubles as Home. */}
-        <nav className={`hidden items-center gap-9 md:flex ${textCls}`}>
+        {/* Left group: the wordmark shows only once scrolled (over the hero,
+            BORROW lives in the photo), with the primary links left-aligned. */}
+        <div className="flex items-center gap-7 lg:gap-10">
+          {solid && (
+            <Link
+              href="/"
+              aria-label="Borrow — home"
+              className={`flex items-center leading-none ${textCls}`}
+            >
+              <span className="font-serif text-[1.7rem] italic leading-none tracking-[0.02em]">
+                BORROW
+              </span>
+            </Link>
+          )}
+          <nav className={`hidden items-center gap-7 lg:gap-9 md:flex ${textCls}`}>
           <div className="group relative">
             <Link href="/shop" className={`${navLink} inline-flex items-center gap-1`}>
               Shop Rentals
@@ -170,7 +171,8 @@ export default function SiteNav({ transparent = false }: { transparent?: boolean
               </ul>
             </div>
           </div>
-        </nav>
+          </nav>
+        </div>
 
         {/* Right icons — each a full 44px tap target on touch devices */}
         <div className={`flex items-center gap-1 sm:gap-2 ${textCls}`}>
