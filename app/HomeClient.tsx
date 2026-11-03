@@ -17,17 +17,17 @@ import { PublicItem, itemSlug } from "@/lib/types";
    Marketing photography lists mirror the originals; swap paths as you add more.
 --------------------------------------------------------------------------- */
 const HERO_IMAGES: string[] = [
-  "/store/space.jpg",
-  "/store/sign.jpg",
-  "/store/gowns.jpg",
+  "/store/life/hero-1.jpg",
+  "/store/life/hero-2.jpg",
+  "/store/life/hero-3.jpg",
 ];
 const HERO_VIDEO = "";
 
 const STUDIO_GALLERY: { src: string; alt: string }[] = [
-  { src: "/store/gallery/rainbow.jpg", alt: "Dresses arranged by color against the forest mural" },
-  { src: "/store/gallery/beaded.jpg", alt: "A beaded gown and pastel pieces on the Lemon Park wall" },
-  { src: "/store/gallery/fitting-room.jpg", alt: "The floral fitting room with a gold sconce and mirror" },
-  { src: "/store/gallery/owner-table.jpg", alt: "Browsing the racks at the BORROW studio" },
+  { src: "/store/life/studio-1.jpg", alt: "The floral fitting room with a gold sconce and mirror" },
+  { src: "/store/life/studio-2.jpg", alt: "A rack of beaded gowns against the pink studio wall" },
+  { src: "/store/life/studio-3.jpg", alt: "Dresses styled on mannequins against the forest mural" },
+  { src: "/store/life/studio-4.jpg", alt: "Browsing the racks at the BORROW studio" },
 ];
 
 // Real customer reviews only — empty hides the whole "What they're saying"
@@ -42,22 +42,24 @@ const FAQS = [
   { q: "How does consignment work?", a: "Bring us the pieces you never reach for; we photograph, list, rent, and clean them, and you earn 20% of every rental, paid straight to your bank. Book a drop-off appointment to get started, and you can retrieve your pieces anytime they aren't rented or reserved." },
 ];
 
-/* Shop-by tiles → deep-link into /shop with the filter pre-applied. Color-block
-   tiles for now (no per-category photos needed); swap to imagery anytime. */
-const CATEGORY_TILES: { label: string; cls: string }[] = [
-  { label: "Dresses", cls: "bg-blush/55" },
-  { label: "Sets", cls: "bg-sage/45" },
-  { label: "Tops", cls: "bg-lavender/60" },
-  { label: "Skirts", cls: "bg-butter/70" },
+/* Occasion tiles → deep-link into /shop with the occasion filter pre-applied,
+   each fronted by a real lifestyle photo. */
+const OCCASION_TILES: { label: string; img: string }[] = [
+  { label: "Formal", img: "/store/life/occ-formal.jpg" },
+  { label: "Gameday", img: "/store/life/occ-gameday.png" },
+  { label: "Date Night", img: "/store/life/occ-datenight.jpg" },
+  { label: "Wedding Guest", img: "/store/life/occ-weddingguest.jpg" },
+  { label: "Vacation", img: "/store/life/occ-vacation.jpg" },
 ];
-const OCCASION_TILES: { label: string; cls: string }[] = [
-  { label: "Vacation", cls: "bg-sage/45" },
-  { label: "Gameday", cls: "bg-blush/55" },
-  { label: "Date Night", cls: "bg-lavender/60" },
-  { label: "Formal", cls: "bg-butter/70" },
-  { label: "Wedding Guest", cls: "bg-blush/35" },
-  { label: "Graduation", cls: "bg-sage/35" },
-];
+
+/* The "View all" editorial collage — a tall shot, a wide shot, and two smaller
+   ones. Real lifestyle photography, links through to the full closet. */
+const VIEW_ALL = {
+  tall: "/store/life/view-tall.jpg",
+  wide: "/store/life/view-wide.jpg",
+  sm1: "/store/life/view-sm1.jpg",
+  sm2: "/store/life/view-sm2.jpg",
+};
 
 function money(n: number | string): string {
   return `$${Number(n)}`;
@@ -74,7 +76,6 @@ export default function HomeClient({
   const [reserved, setReserved] = useState<"confirming" | "done" | "error" | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[] | null>(initialHero);
-  const [categoryTileImgs, setCategoryTileImgs] = useState<Record<string, string>>({});
   const [occasionTileImgs, setOccasionTileImgs] = useState<Record<string, string>>({});
 
   // Hero slides (owner-editable in Settings).
@@ -83,7 +84,6 @@ export default function HomeClient({
       .then((r) => (r.ok ? r.json() : null))
       .then((c) => {
         if (Array.isArray(c?.hero) && c.hero.length > 0) setHeroSlides(c.hero as HeroSlide[]);
-        if (c?.category_tiles && typeof c.category_tiles === "object") setCategoryTileImgs(c.category_tiles);
         if (c?.occasion_tiles && typeof c.occasion_tiles === "object") setOccasionTileImgs(c.occasion_tiles);
       })
       .catch(() => {});
@@ -276,61 +276,93 @@ export default function HomeClient({
       {/* Featured pieces — real inventory near the top */}
       {featuredSection}
 
-      {/* Shop by Category */}
-      <section className="mx-auto max-w-6xl px-5 py-10">
-        <div className="mb-5 flex items-end justify-between">
-          <h2 className="font-serif text-3xl italic font-medium">Shop by Category</h2>
-          <Link href="/shop" className="text-[13px] text-ink/50 underline-offset-2 hover:underline">
+      {/* View all — editorial lifestyle collage (tall + wide + two small) */}
+      <section className="mx-auto max-w-6xl px-5 py-12">
+        <div className="mb-6 text-center">
+          <Link
+            href="/shop"
+            className="font-serif text-3xl italic font-medium link-underline hover:text-ink sm:text-4xl"
+          >
             View all →
           </Link>
         </div>
+        <Link href="/shop" className="group grid gap-3 sm:grid-cols-2 sm:gap-4">
+          {/* Tall shot */}
+          <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/30 sm:aspect-auto">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={VIEW_ALL.tall} alt="Styled at the BORROW studio" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+          </div>
+          {/* Right column: wide shot over two smaller ones */}
+          <div className="grid gap-3 sm:gap-4">
+            <div className="relative aspect-[16/11] overflow-hidden rounded-2xl bg-lavender/30">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={VIEW_ALL.wide} alt="Out in the wild in BORROW" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-lavender/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={VIEW_ALL.sm1} alt="Dressed for the day in BORROW" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+              </div>
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-lavender/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={VIEW_ALL.sm2} alt="Girls' night in BORROW" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+              </div>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      {/* Shop by Occasion — real lifestyle photo tiles */}
+      <section className="mx-auto max-w-6xl px-5 pb-12">
+        <h2 className="mb-6 font-serif text-3xl italic font-medium">Shop by Occasion</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {CATEGORY_TILES.map((t) => {
-            const img = categoryTileImgs[t.label];
+          {OCCASION_TILES.map((t) => {
+            const img = occasionTileImgs[t.label] || t.img;
             return (
               <Link
                 key={t.label}
-                href={`/shop?category=${encodeURIComponent(t.label)}`}
-                className={`group relative flex aspect-[4/5] items-end justify-center overflow-hidden rounded-2xl ${img ? "bg-ink" : t.cls} p-4 transition-transform hover:scale-[1.02]`}
+                href={`/shop?occasion=${encodeURIComponent(t.label)}`}
+                className="group text-center"
               >
-                {img && (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt={t.label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/5 to-transparent" />
-                  </>
-                )}
-                <span className={`relative font-serif text-xl italic font-medium ${img ? "text-cream drop-shadow" : ""}`}>{t.label}</span>
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-lavender/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt={t.label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
+                <span className="mt-2.5 block text-[13px] font-medium uppercase tracking-[0.14em] text-ink/75">
+                  {t.label}
+                </span>
               </Link>
             );
           })}
         </div>
       </section>
 
-      {/* Shop by Occasion */}
-      <section className="mx-auto max-w-6xl px-5 pb-10">
-        <h2 className="mb-5 font-serif text-3xl italic font-medium">Shop by Occasion</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {OCCASION_TILES.map((t) => {
-            const img = occasionTileImgs[t.label];
-            return (
+      {/* Lookbook — editorial feature */}
+      <section className="px-5 py-10">
+        <Reveal className="mx-auto max-w-6xl">
+          <div className="grid overflow-hidden rounded-3xl sm:grid-cols-2">
+            <div className="relative aspect-[4/5] sm:aspect-auto">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/store/life/lookbook.jpg" alt="The BORROW girls at the studio" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            </div>
+            <div className="flex flex-col justify-center bg-petal px-8 py-14 text-center sm:px-12 sm:text-left">
+              <p className="kicker">The Lookbook</p>
+              <h2 className="mt-2 font-serif text-4xl italic font-medium leading-tight sm:text-5xl">
+                Styled by us, worn by you
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink/65 sm:mx-0">
+                Every piece in the closet, styled and ready to rent. Browse the full
+                collection and find the one for your next occasion.
+              </p>
               <Link
-                key={t.label}
-                href={`/shop?occasion=${encodeURIComponent(t.label)}`}
-                className={`group relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl ${img ? "bg-ink" : t.cls} p-3 text-center transition-transform hover:scale-[1.02]`}
+                href="/lookbook"
+                className="mx-auto mt-6 inline-block w-max rounded-full bg-ink px-7 py-3.5 text-[14px] font-medium text-cream transition-transform hover:scale-[1.03] sm:mx-0"
               >
-                {img && (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt={t.label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/10 to-transparent" />
-                  </>
-                )}
-                <span className={`relative font-serif text-lg italic font-medium leading-tight ${img ? "text-cream drop-shadow" : ""}`}>{t.label}</span>
+                Explore the lookbook →
               </Link>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* Consign / drop-off call-out */}
