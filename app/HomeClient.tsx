@@ -126,7 +126,17 @@ export default function HomeClient({
     })();
   }, []);
 
-  const featured = (items ?? []).slice(0, 8);
+  // Owner-starred Featured pieces, in the manual order set in the studio
+  // (featured_rank; lower = earlier). Falls back to nothing if none are starred —
+  // the section hides itself rather than showing random stock.
+  const featured = (items ?? [])
+    .filter((it) => it.featured)
+    .sort(
+      (a, b) =>
+        (a.featured_rank ?? Number.MAX_SAFE_INTEGER) -
+        (b.featured_rank ?? Number.MAX_SAFE_INTEGER)
+    )
+    .slice(0, 8);
 
   // Real inventory, rendered high on the page (right under the hero intro) so a
   // phone shopper sees actual pieces without scrolling past the category tiles.
