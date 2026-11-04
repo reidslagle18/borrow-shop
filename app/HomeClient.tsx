@@ -228,17 +228,19 @@ export default function HomeClient() {
             </h1>
           </div>
         </HeroMedia>
-        {/* Scalloped bottom edge */}
+        {/* Scalloped bottom edge — large white convex bumps rising into the photo */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-4 bg-cream sm:h-5"
+          className="absolute inset-x-0 bottom-0 h-9 bg-cream"
           style={{
-            WebkitMaskImage: "radial-gradient(circle at 10px bottom, transparent 10px, black 10.5px)",
-            maskImage: "radial-gradient(circle at 10px bottom, transparent 10px, black 10.5px)",
+            WebkitMaskImage: "radial-gradient(circle 36px at 50% 100%, #000 98%, transparent 100%)",
+            maskImage: "radial-gradient(circle 36px at 50% 100%, #000 98%, transparent 100%)",
             WebkitMaskRepeat: "repeat-x",
             maskRepeat: "repeat-x",
-            WebkitMaskSize: "20px 20px",
-            maskSize: "20px 20px",
+            WebkitMaskSize: "72px 36px",
+            maskSize: "72px 36px",
+            WebkitMaskPosition: "center bottom",
+            maskPosition: "center bottom",
           }}
         />
       </section>
