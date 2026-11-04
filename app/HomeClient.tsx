@@ -251,24 +251,6 @@ export default function HomeClient({
         />
       </section>
 
-      {/* Consign / drop-off call-out — right under the hero */}
-      <section className="px-5 pt-8">
-        <Reveal className="mx-auto max-w-5xl">
-          <div className="flex flex-col items-center gap-5 rounded-3xl bg-sage/35 px-6 py-8 text-center sm:flex-row sm:justify-between sm:gap-8 sm:px-10 sm:text-left">
-            <div>
-              <p className="kicker text-sage-deep">Consign with Borrow</p>
-              <h2 className="mt-1.5 font-serif text-2xl italic font-medium sm:text-3xl">Have pieces to drop off?</h2>
-              <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-ink/65">
-                Bring in the dresses you&apos;re done with, and you earn 20% every time one rents. Book a quick appointment and we&apos;ll handle the rest.
-              </p>
-            </div>
-            <a href="/dropoff" className="inline-block w-full shrink-0 rounded-full bg-ink px-8 py-4 text-center text-[15px] font-medium text-cream transition-transform hover:scale-[1.03] sm:w-auto">
-              Rent out your clothes →
-            </a>
-          </div>
-        </Reveal>
-      </section>
-
       {/* Signature brand ticker — a little moving detail, girly but restrained */}
       <section aria-hidden="true" className="overflow-hidden border-b border-blush/30 bg-petal py-3">
         <div className="flex w-max animate-marquee items-center whitespace-nowrap">
@@ -303,6 +285,24 @@ export default function HomeClient({
 
       {/* Featured pieces — real inventory near the top */}
       {featuredSection}
+
+      {/* Consign / drop-off call-out — right below Featured */}
+      <section className="px-5 py-10">
+        <Reveal className="mx-auto max-w-5xl">
+          <div className="flex flex-col items-center gap-5 rounded-3xl bg-sage/35 px-6 py-8 text-center sm:flex-row sm:justify-between sm:gap-8 sm:px-10 sm:text-left">
+            <div>
+              <p className="kicker text-sage-deep">Consign with Borrow</p>
+              <h2 className="mt-1.5 font-serif text-2xl italic font-medium sm:text-3xl">Have pieces to drop off?</h2>
+              <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-ink/65">
+                Bring in the dresses you&apos;re done with, and you earn 20% every time one rents. Book a quick appointment and we&apos;ll handle the rest.
+              </p>
+            </div>
+            <a href="/dropoff" className="inline-block w-full shrink-0 rounded-full bg-ink px-8 py-4 text-center text-[15px] font-medium text-cream transition-transform hover:scale-[1.03] sm:w-auto">
+              Rent out your clothes →
+            </a>
+          </div>
+        </Reveal>
+      </section>
 
       {/* View all — editorial lifestyle collage (tall + wide + two small) */}
       <section className="mx-auto max-w-6xl px-5 py-12">
