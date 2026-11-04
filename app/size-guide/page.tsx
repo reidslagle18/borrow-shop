@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
+import { tryPlasmicPage } from "@/components/plasmic/PlasmicEditable";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Size Guide · BORROW",
@@ -22,7 +25,13 @@ const ROWS = [
 const H = "mt-9 font-serif text-2xl font-medium";
 const P = "mt-2 text-[15px] leading-relaxed text-ink/70";
 
-export default function SizeGuidePage() {
+export default async function SizeGuidePage() {
+  const plasmic = await tryPlasmicPage("/size-guide");
+  if (plasmic) return plasmic;
+  return <SizeGuideBody />;
+}
+
+function SizeGuideBody() {
   return (
     <main className="min-h-screen w-full overflow-x-hidden">
       <header className="flex items-center justify-between gap-3 px-5 py-4">
