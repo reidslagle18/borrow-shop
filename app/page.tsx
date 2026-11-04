@@ -1,10 +1,5 @@
 import HomeClient from "./HomeClient";
 import type { HeroSlide } from "@/components/HeroMedia";
-import { tryPlasmicPage } from "@/components/plasmic/PlasmicEditable";
-
-// Refresh published Plasmic edits within 5 min without a redeploy; also keeps the
-// last good build cached so the page survives a Plasmic outage.
-export const revalidate = 300;
 
 /**
  * Server wrapper: fetch the hero slides (with their saved crops) on the server so
@@ -26,11 +21,6 @@ async function getHeroSlides(): Promise<HeroSlide[] | null> {
 }
 
 export default async function Page() {
-  // If a homepage has been published in Plasmic, render that; otherwise fall back
-  // to the hand-coded homepage (so it looks identical until it's edited).
-  const plasmic = await tryPlasmicPage("/");
-  if (plasmic) return plasmic;
-
   const initialHero = await getHeroSlides();
   return <HomeClient initialHero={initialHero} />;
 }
