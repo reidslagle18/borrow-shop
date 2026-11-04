@@ -16,10 +16,10 @@ import { PublicItem, itemSlug } from "@/lib/types";
    REDESIGN PREVIEW — clean "landing" homepage. Browsing lives on /shop.
    Marketing photography lists mirror the originals; swap paths as you add more.
 --------------------------------------------------------------------------- */
-const HERO_IMAGES: string[] = [
-  "/store/life/hero-1.jpg",
-  "/store/life/hero-2.jpg",
-  "/store/life/hero-3.jpg",
+// Single fixed hero — the brick-wall group photo, shown landscape and focused on
+// the faces (posY). Not a carousel, and it ignores any studio-configured slides.
+const HERO_SLIDES: HeroSlide[] = [
+  { src: "/store/life/hero-group.jpg", posX: 50, posY: 43, zoom: 1 },
 ];
 const HERO_VIDEO = "";
 
@@ -65,25 +65,17 @@ function money(n: number | string): string {
   return `$${Number(n)}`;
 }
 
-export default function HomeClient({
-  initialHero = null,
-}: {
-  // Server-provided hero slides (with saved crops) so the cropped hero is in the
-  // first paint — no uncropped→crop jump. Null when none are configured.
-  initialHero?: HeroSlide[] | null;
-}) {
+export default function HomeClient() {
   const [items, setItems] = useState<PublicItem[] | null>(null);
   const [reserved, setReserved] = useState<"confirming" | "done" | "error" | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [heroSlides, setHeroSlides] = useState<HeroSlide[] | null>(initialHero);
   const [occasionTileImgs, setOccasionTileImgs] = useState<Record<string, string>>({});
 
-  // Hero slides (owner-editable in Settings).
+  // Occasion tile images (owner-editable in Settings). Hero is fixed in code.
   useEffect(() => {
     fetch("/api/config")
       .then((r) => (r.ok ? r.json() : null))
       .then((c) => {
-        if (Array.isArray(c?.hero) && c.hero.length > 0) setHeroSlides(c.hero as HeroSlide[]);
         if (c?.occasion_tiles && typeof c.occasion_tiles === "object") setOccasionTileImgs(c.occasion_tiles);
       })
       .catch(() => {});
@@ -228,7 +220,7 @@ export default function HomeClient({
 
       {/* Hero */}
       <section className="relative -mt-[68px]">
-        <HeroMedia images={HERO_IMAGES} slides={heroSlides ?? undefined} video={HERO_VIDEO || undefined}>
+        <HeroMedia images={[]} slides={HERO_SLIDES} video={HERO_VIDEO || undefined}>
           {/* Wordmark set into the bottom-right of the hero photo (editorial). */}
           <div className="animate-rise absolute inset-0 z-[2] flex items-end justify-end px-6 pb-9 sm:px-12 sm:pb-12">
             <h1 className="font-serif text-6xl leading-[0.85] tracking-tight text-cream [text-shadow:0_1px_4px_rgba(0,0,0,0.55),0_4px_26px_rgba(0,0,0,0.4)] sm:text-8xl md:text-[8.5rem]">
@@ -249,38 +241,6 @@ export default function HomeClient({
             maskSize: "20px 20px",
           }}
         />
-      </section>
-
-      {/* Signature brand ticker — a little moving detail, girly but restrained */}
-      <section aria-hidden="true" className="overflow-hidden border-b border-blush/30 bg-petal py-3">
-        <div className="flex w-max animate-marquee items-center whitespace-nowrap">
-          {Array.from({ length: 2 }).map((_, r) => (
-            <div key={r} className="flex items-center">
-              {["Formals", "Date parties", "Game days", "Weddings", "Graduation", "Vacation"].map(
-                (w, i) => (
-                  <span key={`${r}-${i}`} className="flex items-center gap-5 px-5 text-ink/70">
-                    <span className="font-serif text-xl italic">{w}</span>
-                    <span className="text-blush-deep">·</span>
-                  </span>
-                )
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Intro line */}
-      <section className="px-6 pb-4 pt-10 text-center">
-        <p className="mx-auto max-w-md text-[17px] leading-relaxed text-ink/65">
-          A curated closet for formals, date parties, wedding guests, game days, and more, yours for the week.
-        </p>
-        <div className="mx-auto mt-5 flex max-w-md items-center justify-center gap-2 text-[12px] uppercase tracking-[0.18em] text-ink/45">
-          <span>Find your outfit</span>
-          <span className="text-blush-deep">·</span>
-          <span>Book your week</span>
-          <span className="text-blush-deep">·</span>
-          <span>Return by day 7</span>
-        </div>
       </section>
 
       {/* Featured pieces — real inventory near the top */}
