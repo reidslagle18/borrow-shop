@@ -629,6 +629,13 @@ export default function PortalPage() {
           <h2 className="mt-8 font-serif text-2xl font-medium">
             Your closet ({portal.items.length})
           </h2>
+          {portal.items.length > 0 && (
+            <p className="mt-1 text-[13px] text-ink/55">
+              Want a piece back — for an event or for good? Tap{" "}
+              <span className="font-medium text-ink/80">↩ Request this piece back</span>{" "}
+              under any item and pick your dates. It stays yours anytime.
+            </p>
+          )}
           <div className="mt-3 space-y-2">
             {portal.items.length === 0 ? (
               <div className="rounded-2xl bg-white p-6 text-center">
@@ -836,9 +843,9 @@ export default function PortalPage() {
                               setHoldEnd("");
                               setCleaningAck(false);
                             }}
-                            className="text-[13px] font-medium text-ink/70 underline underline-offset-2"
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-ink/25 bg-cream px-4 py-2.5 text-[13px] font-semibold text-ink transition-colors hover:bg-ink hover:text-cream"
                           >
-                            Request this piece back
+                            ↩ Request this piece back
                           </button>
                         ) : null}
                       </div>

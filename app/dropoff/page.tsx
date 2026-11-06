@@ -10,6 +10,7 @@ const labelCls = "mb-1.5 block text-xs uppercase tracking-[0.15em] text-ink/50";
 
 const GUIDELINES = [
   "Borrow is a curated closet, so we're selective about what we carry, so bring your best, current, on-trend pieces in excellent condition. All items should be clean and ready to rent; we're unable to accept anything stained, damaged, or in need of cleaning.",
+  "A quick heads-up: we focus on pieces that originally retailed around $200 or more, since that's what rents best. Bring your nicer, higher-end items and we'll go from there.",
   "We may accept some, all, or none of what you bring in, that's what keeps the closet special.",
   "Accepted pieces are consigned to you: you earn 20% every time yours rents, and you can retrieve any piece at any time, as long as it isn't currently rented out or reserved.",
 ];
